@@ -141,8 +141,8 @@ export default function DashboardPage() {
                 }`} />
               </div>
               <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{stat.label}</p>
-              <p className="text-xs text-zinc-600 mt-1">{stat.sub}</p>
+              <p className="text-xs text-zinc-300 mt-0.5 font-medium">{stat.label}</p>
+              <p className="text-xs text-zinc-400 mt-1">{stat.sub}</p>
             </motion.div>
           ))}
         </div>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             <motion.div {...fadeUp(0.2)} className="glass rounded-2xl overflow-hidden">
               <div className="flex items-center justify-between p-5 border-b border-white/5">
                 <h2 className="font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Your policies</h2>
-                <Badge className="bg-zinc-800 text-zinc-400 border-zinc-700 text-xs">{mockPolicies.length} total</Badge>
+                <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 text-xs font-medium">{mockPolicies.length} total</Badge>
               </div>
               <div className="divide-y divide-white/5">
                 {mockPolicies.map((policy, i) => (
@@ -181,14 +181,14 @@ export default function DashboardPage() {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-mono font-bold text-sm text-white">{policy.flight}</span>
-                            <span className="text-zinc-600 text-xs">·</span>
-                            <span className="text-zinc-500 text-xs">{policy.route}</span>
+                            <span className="text-zinc-500 text-xs">·</span>
+                            <span className="text-zinc-300 text-xs">{policy.route}</span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Calendar className="w-3 h-3 text-zinc-600" />
-                            <span className="text-xs text-zinc-600">{policy.date}</span>
-                            <span className="text-zinc-700 text-xs">·</span>
-                            <span className="text-xs text-zinc-600">{policy.id}</span>
+                            <span className="text-xs text-zinc-400">{policy.date}</span>
+                            <span className="text-zinc-500 text-xs">·</span>
+                            <span className="text-xs text-zinc-400">{policy.id}</span>
                           </div>
                         </div>
                       </div>
@@ -201,7 +201,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center justify-between mt-3">
                       <StatusBadge status={policy.status} />
-                      <button className="text-xs text-zinc-600 hover:text-zinc-400 flex items-center gap-1 transition-colors">
+                      <button className="text-xs text-zinc-400 hover:text-zinc-300 flex items-center gap-1 transition-colors">
                         <ExternalLink className="w-3 h-3" />
                         View on-chain
                       </button>
@@ -240,9 +240,9 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-zinc-300">{item.text}</p>
-                      <p className="text-xs text-zinc-600 truncate">{item.subtext}</p>
+                      <p className="text-xs text-zinc-400 truncate">{item.subtext}</p>
                     </div>
-                    <span className="text-[10px] text-zinc-700 flex-shrink-0">{item.time}</span>
+                    <span className="text-[10px] text-zinc-500 flex-shrink-0">{item.time}</span>
                   </motion.div>
                 ))}
               </div>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-medium text-zinc-300">Analytics</p>
                 <Badge className="bg-violet-400/10 text-violet-400 border-violet-400/20 text-[10px] ml-auto">Soon</Badge>
               </div>
-              <p className="text-xs text-zinc-600 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed">
                 Historical payout rates, route delay heatmaps, and portfolio analytics coming in v2.
               </p>
               <button className="mt-3 text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">

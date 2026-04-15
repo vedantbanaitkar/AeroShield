@@ -1,10 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWallet } from '@txnlab/use-wallet-react'
 import {
   Shield, Zap, Plane, CheckCircle2, Loader2,
-  AlertCircle, ExternalLink, ArrowRight, Info, Wallet
+  AlertCircle, ExternalLink, ArrowRight, Info, Wallet, TrendingDown, TrendingUp
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,6 +25,9 @@ interface Policy {
   txId?: string
   delayMinutes?: number
   payoutTxId?: string
+  balanceBeforePurchase?: number
+  balanceAfterPurchase?: number
+  balanceAfterPayout?: number
 }
 
 const COVERAGE_OPTIONS = [5, 10, 25, 50, 100]
@@ -37,6 +40,33 @@ export default function AppPage() {
   const [coverage, setCoverage] = useState(10)
   const [errorMsg, setErrorMsg] = useState('')
   const [mockDelay, setMockDelay] = useState(false)
+  const [walletBalance, setWalletBalance] = useState<number | null>(null)
+
+  // Fetch wallet balance when account connects
+  useEffect(() => {
+    if (!activeAccount) {
+      setWalletBalance(null)
+      return
+    }
+
+    const fetchBalance = async () => {
+      try {
+        const algodClient = new algosdk.Algodv2(
+          process.env.NEXT_PUBLIC_ALGOD_TOKEN ?? '',
+          process.env.NEXT_PUBLIC_ALGOD_SERVER ?? 'https://testnet-api.algonode.cloud',
+          Number(process.env.NEXT_PUBLIC_ALGOD_PORT ?? 443)
+        )
+        const accountInfo = await algodClient.accountInformation(activeAccount.address).do()
+        setWalletBalance(Number(accountInfo.amount) / 1_000_000) // Convert microAlgo to Algo
+      } catch (e) {
+        console.error('Failed to fetch balance:', e)
+      }
+    }
+
+    fetchBalance()
+    const interval = setInterval(fetchBalance, 3000) // Refresh every 3 seconds
+    return () => clearInterval(interval)
+  }, [activeAccount])
 
   const premium = +(coverage * 0.05).toFixed(2)
 
@@ -56,6 +86,11 @@ export default function AppPage() {
         process.env.NEXT_PUBLIC_ALGOD_SERVER ?? 'https://testnet-api.algonode.cloud',
         Number(process.env.NEXT_PUBLIC_ALGOD_PORT ?? 443)
       )
+
+      // Capture balance before purchase
+      const accountInfoBefore = await algodClient.accountInformation(activeAccount.address).do()
+      const balanceBefore = Number(accountInfoBefore.amount) / 1_000_000
+
       const sp = await algodClient.getTransactionParams().do()
       const premiumMicroAlgo = Math.round(premium * 1_000_000)
       const appAddress = algosdk.getApplicationAddress(APP_ID)
@@ -72,14 +107,22 @@ export default function AppPage() {
       const signed = await signTransactions(encoded)
       const { txid: id } = await algodClient.sendRawTransaction(signed as Uint8Array[]).do()
 
+      // Wait a moment for transaction to settle and capture balance after
+      await new Promise(r => setTimeout(r, 2000))
+      const accountInfoAfter = await algodClient.accountInformation(activeAccount.address).do()
+      const balanceAfter = Number(accountInfoAfter.amount) / 1_000_000
+
       const newPolicy: Policy = {
         flightNumber,
         coverage,
         premium,
         walletAddress: activeAccount.address,
         txId: id,
+        balanceBeforePurchase: balanceBefore,
+        balanceAfterPurchase: balanceAfter,
       }
       setPolicy(newPolicy)
+      setWalletBalance(balanceAfter)
       setStep('monitoring')
     } catch (e: any) {
       setErrorMsg(e.message ?? 'Transaction failed')
@@ -125,7 +168,24 @@ export default function AppPage() {
         }),
       })
       const data = await res.json()
-      setPolicy(prev => ({ ...prev!, payoutTxId: data.txId, delayMinutes }))
+
+      // Capture balance after payout
+      const algodClient = new algosdk.Algodv2(
+        process.env.NEXT_PUBLIC_ALGOD_TOKEN ?? '',
+        process.env.NEXT_PUBLIC_ALGOD_SERVER ?? 'https://testnet-api.algonode.cloud',
+        Number(process.env.NEXT_PUBLIC_ALGOD_PORT ?? 443)
+      )
+      await new Promise(r => setTimeout(r, 2000)) // Wait for payout to settle
+      const accountInfo = await algodClient.accountInformation(activeAccount.address).do()
+      const balanceAfter = Number(accountInfo.amount) / 1_000_000
+
+      setPolicy(prev => ({ 
+        ...prev!, 
+        payoutTxId: data.txId, 
+        delayMinutes,
+        balanceAfterPayout: balanceAfter
+      }))
+      setWalletBalance(balanceAfter)
       setStep('done')
     } catch (e: any) {
       setErrorMsg(e.message)
@@ -186,12 +246,27 @@ export default function AppPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 p-3 bg-emerald-400/5 border border-emerald-400/20 rounded-xl">
-                      <div className="status-dot" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-zinc-500">Connected wallet</p>
-                        <p className="text-sm font-mono text-zinc-300 truncate">{activeAccount.address}</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 p-3 bg-emerald-400/5 border border-emerald-400/20 rounded-xl">
+                        <div className="status-dot" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-zinc-500">Connected wallet</p>
+                          <p className="text-sm font-mono text-zinc-300 truncate">{activeAccount.address}</p>
+                        </div>
                       </div>
+                      {walletBalance !== null && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center gap-3 p-4 bg-gradient-to-r from-cyan-400/5 to-blue-400/5 border border-cyan-400/20 rounded-xl"
+                        >
+                          <Wallet className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-xs text-zinc-500">Wallet Balance</p>
+                            <p className="text-lg font-bold text-white">{walletBalance.toFixed(2)} ALGO</p>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
                   )}
 
@@ -199,23 +274,23 @@ export default function AppPage() {
 
                   {/* Flight number */}
                   <div className="space-y-2">
-                    <Label className="text-zinc-300 text-sm">Flight number</Label>
+                    <Label className="text-white text-sm font-medium">Flight number</Label>
                     <div className="relative">
                       <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                       <Input
                         value={flightNumber}
                         onChange={e => setFlightNumber(e.target.value.toUpperCase())}
                         placeholder="e.g. AI302, 6E204"
-                        className="pl-10 bg-white/8 border-white/15 focus:border-cyan-400/60 text-white font-mono placeholder:text-zinc-500"
+                        className="pl-10 bg-white/8 border-white/15 focus:border-cyan-400/60 text-white font-mono placeholder:text-zinc-300"
                         disabled={!activeAccount}
                       />
                     </div>
-                    <p className="text-xs text-zinc-400">Enter the IATA flight code (airline code + flight number)</p>
+                    <p className="text-xs text-zinc-300">Enter the IATA flight code (airline code + flight number)</p>
                   </div>
 
                   {/* Coverage selector */}
                   <div className="space-y-3">
-                    <Label className="text-zinc-300 text-sm">Coverage amount</Label>
+                    <Label className="text-white text-sm font-medium">Coverage amount</Label>
                     <div className="grid grid-cols-5 gap-2">
                       {COVERAGE_OPTIONS.map(opt => (
                         <button
@@ -225,7 +300,7 @@ export default function AppPage() {
                           className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
                             coverage === opt
                               ? 'bg-cyan-400 text-black glow-cyan'
-                              : 'glass glass-hover text-zinc-400 hover:text-white'
+                              : 'glass glass-hover text-zinc-200 hover:text-white'
                           }`}
                         >
                           {opt}
@@ -233,7 +308,7 @@ export default function AppPage() {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-zinc-400">Coverage in ALGO · Triggers on ≥ 2 hour delay</p>
+                    <p className="text-xs text-zinc-300">Coverage in ALGO · Triggers on ≥ 2 hour delay</p>
                   </div>
 
                   {/* Demo mode toggle */}
@@ -349,6 +424,28 @@ export default function AppPage() {
                     </div>
                   </div>
 
+                  {/* Transaction summary */}
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                    <p className="text-xs text-zinc-500 uppercase tracking-widest">Purchase confirmed</p>
+                    {policy.balanceBeforePurchase !== undefined && policy.balanceAfterPurchase !== undefined && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-zinc-400">Before purchase</span>
+                          <span className="font-mono text-sm text-zinc-300">{policy.balanceBeforePurchase.toFixed(2)} ALGO</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-2 bg-red-400/5 border border-red-400/20 rounded-lg">
+                          <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />
+                          <span className="text-sm text-red-300">Premium paid</span>
+                          <span className="ml-auto font-bold text-red-400">-{policy.premium} ALGO</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-zinc-400">After purchase</span>
+                          <span className="font-mono text-sm text-zinc-300">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {policy.txId && (
                     <a
                       href={`https://testnet.explorer.perawallet.app/tx/${policy.txId}`}
@@ -424,31 +521,58 @@ export default function AppPage() {
                   className="glass rounded-2xl p-8 text-center border border-emerald-400/20 relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-emerald-400/3" />
-                  <div className="relative">
+                  <div className="relative space-y-6">
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', delay: 0.1, stiffness: 200 }}
-                      className="w-20 h-20 rounded-full bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center mx-auto mb-5"
+                      className="w-20 h-20 rounded-full bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center mx-auto"
                     >
                       <CheckCircle2 className="w-10 h-10 text-emerald-400" />
                     </motion.div>
-                    <h3 className="text-2xl font-bold mb-2 text-emerald-400" style={{ fontFamily: 'Syne, sans-serif' }}>Payout sent!</h3>
-                    <p className="text-zinc-300 mb-1">{policy.coverage} ALGO</p>
-                    <p className="text-zinc-500 text-sm mb-6">
-                      {policy.delayMinutes} minute delay confirmed · Paid automatically by smart contract
-                    </p>
+                    
+                    <div>
+                      <h3 className="text-2xl font-bold mb-2 text-emerald-400" style={{ fontFamily: 'Syne, sans-serif' }}>Payout sent!</h3>
+                      <p className="text-zinc-300 mb-1">{policy.coverage} ALGO</p>
+                      <p className="text-zinc-500 text-sm mb-2">
+                        {policy.delayMinutes} minute delay confirmed · Paid automatically by smart contract
+                      </p>
+                    </div>
+
+                    {/* Payout fund movement */}
+                    {policy.balanceAfterPurchase !== undefined && policy.balanceAfterPayout !== undefined && (
+                      <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2 text-left">
+                        <p className="text-xs text-zinc-500 uppercase tracking-widest">Payout settlement</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-zinc-400">Before payout</span>
+                            <span className="font-mono text-sm text-zinc-300">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
+                          </div>
+                          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-400/5 border border-emerald-400/20 rounded-lg">
+                            <TrendingUp className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                            <span className="text-sm text-emerald-300">Coverage received</span>
+                            <span className="ml-auto font-bold text-emerald-400">+{policy.coverage} ALGO</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-zinc-400">After payout</span>
+                            <span className="font-mono text-sm text-white font-bold">{policy.balanceAfterPayout.toFixed(2)} ALGO</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {policy.payoutTxId && (
                       <a
                         href={`https://testnet.explorer.perawallet.app/tx/${policy.payoutTxId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-6"
+                        className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                       >
                         <ExternalLink className="w-4 h-4" />
-                        View on Pera Explorer
+                        View payout transaction on Pera Explorer
                       </a>
                     )}
+                    
                     <Button
                       onClick={() => { setStep('form'); setPolicy(null) }}
                       className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white"

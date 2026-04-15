@@ -65,6 +65,7 @@ export default function DocsPage() {
           <aside className="md:col-span-1">
             <motion.div {...fadeUp()} className="sticky top-24">
               <p className="text-xs uppercase tracking-widest text-zinc-600 mb-3 px-3">Documentation</p>
+                <p className="text-xs uppercase tracking-widest text-zinc-400 font-semibold mb-3 px-3">Documentation</p>
               <nav className="space-y-0.5">
                 {sections.map(section => (
                   <a
@@ -75,7 +76,7 @@ export default function DocsPage() {
                       'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all',
                       activeSection === section.id
                         ? 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/20'
-                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                        : 'text-zinc-300 hover:text-white hover:bg-white/5'
                     )}
                   >
                     <section.icon className="w-4 h-4 flex-shrink-0" />
@@ -85,7 +86,7 @@ export default function DocsPage() {
               </nav>
 
               <div className="mt-6 glass rounded-xl p-4 border border-violet-400/10">
-                <p className="text-xs text-zinc-600 mb-2">Need help?</p>
+                <p className="text-xs text-zinc-400 font-medium mb-2">Need help?</p>
                 <a href="#" className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors">
                   Join Discord <ExternalLink className="w-3 h-3" />
                 </a>
@@ -125,9 +126,10 @@ export default function DocsPage() {
                   </div>
                 ))}
               </div>
-            </motion.section>
 
             {/* Architecture */}
+                        </motion.section>
+
             <motion.section {...fadeUp(0.15)}>
               <SectionHeader id="architecture" title="Architecture" />
               <p className="text-zinc-400 leading-relaxed mb-4">
