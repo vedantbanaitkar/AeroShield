@@ -98,7 +98,37 @@ Pera checks: "Do I have TestNet accounts?"
 
 **Current Status**: If you toggled to TestNet in developer settings and connection works, make sure to create a permanent TestNet account for reliability.
 
-## Recommended Next Actions
+## Troubleshooting: Common Errors
+
+### Error: "Connect modal is closed by user"
+**Type**: `PeraWalletConnectError`
+
+**What it means**: User scanned QR but closed/cancelled the Pera connection modal before approving
+
+**Solution - Complete Connection Steps**:
+1. Click "Connect Wallet" on dApp → QR code appears
+2. Open Pera → Tap camera/scan icon
+3. Scan QR code (wait 2-3 seconds for it to process)
+4. Pera shows: "Connect to AeroShield?" popup
+5. **IMPORTANT**: Tap **CONFIRM/APPROVE** button (don't close it!)
+6. Wait for Pera to complete → Modal closes automatically
+7. Should see connected account on dApp ✅
+
+**Common Mistakes to Avoid**:
+- ❌ Scanning QR then immediately closing Pera
+- ❌ Not tapping the confirm/approve button
+- ❌ Closing the QR modal on desktop too early
+- ❌ Having TestNet toggle OFF when connecting
+- ❌ Switching apps during connection
+
+**Correct Flow**:
+```
+Scan QR → Wait for prompt → Tap CONFIRM → Let complete → Success ✅
+```
+
+---
+
+### Issue: Connection Works Locally but Production Shows Different Error
 
 1. **Create TestNet account in Pera** (if you haven't already)
 2. **Test on localhost** (`http://localhost:3000`)
