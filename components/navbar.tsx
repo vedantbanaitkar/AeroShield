@@ -20,6 +20,7 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const { activeAccount, wallets } = useWallet();
+  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -34,13 +35,17 @@ export function Navbar() {
     : null;
 
   function handleConnect() {
-    // Try Pera first (native mobile wallet)
-    const peraWallet = wallets?.find((w) => w.id === "pera");
-    if (peraWallet) {
-      peraWallet.connect();
-    } else {
-      // Fallback to WalletConnect
-      wallets?.find((w) => w.id === "walletconnect")?.connect();
+    const preferredOrder =
+      connectMode === "walletconnect-first"
+        ? ["walletconnect", "pera", "defly"]
+        : ["pera", "defly", "walletconnect"];
+
+    for (const walletId of preferredOrder) {
+      const wallet = wallets?.find((w) => w.id === walletId);
+      if (wallet) {
+        wallet.connect();
+        return;
+      }
     }
   }
   function handleDisconnect() {
