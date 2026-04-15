@@ -1,0 +1,125 @@
+# AeroShield Wallet Connection - Current Status & Next Steps
+
+## Current Setup
+
+**Environment**: Configured for Algorand TestNet
+- Network: `testnet` (TestNet API: `testnet-api.algonode.cloud`)
+- App ID: `758806136`
+- Wallet Mode: `pera-first` (Pera is primary, others as fallback)
+- Dev Server: `http://localhost:3000`
+- Production: `https://aero-shield-lemon.vercel.app`
+
+## Issue: "Network Mismatch" Error
+
+### Most Likely Cause
+Your mobile **Pera wallet doesn't have a TestNet account**. 
+
+When the dApp requests a TestNet connection and your Pera wallet has no TestNet accounts, it shows "Network mismatch" error.
+
+### Solution (CRITICAL)
+
+**Step 1: Create a TestNet Account in Pera**
+1. Open Pera wallet app on mobile
+2. Tap the **"+" or "Add Account"** button
+3. Select **"Create New Account as a Signer"**
+4. **IMPORTANT**: Ensure you're creating it on **TestNet** (not MainNet)
+   - Look for network selector at top of create screen
+   - Choose "TestNet"
+5. Complete account creation
+6. Back up seed phrase if needed
+
+**Step 2: Verify Account Exists**
+1. In Pera account list, you should now see a TestNet account
+2. It should show the network label (TestNet)
+
+**Step 3: Test Connection**
+1. On your computer: Open `http://localhost:3000`
+2. Click **"Connect Wallet"** button
+3. You should see a QR code (Pera connection QR)
+4. On mobile Pera: **Scan the QR code**
+5. Pera should prompt you to select account → tap your TestNet account
+6. **Expected**: Connection succeeds without "Network mismatch" error
+
+## Testing URLs
+
+- **Local Development**: `http://localhost:3000`
+  - Dev server running now
+  - Use for testing before pushing to production
+
+- **Production**: `https://aero-shield-lemon.vercel.app`
+  - Latest code deployed automatically
+  - Use for final testing
+
+## Wallet Connection Flow (Pera-First Mode)
+
+```
+User clicks "Connect Wallet"
+    ↓
+dApp checks: NEXT_PUBLIC_CONNECT_MODE = "pera-first"
+    ↓
+Shows Pera wallet QR code
+    ↓
+User scans with mobile Pera
+    ↓
+Pera checks: "Do I have TestNet accounts?"
+    ├─ YES → Shows account selection → Connection ✅
+    └─ NO → Shows "Network mismatch" error ❌ (THIS IS YOU)
+```
+
+## What Changed in Code
+
+1. **Removed unsupported WalletConnect namespace config**: The `optionalNamespaces` configuration wasn't working and was removed
+2. **Simplified to basics**: Now uses only `defaultNetwork: NetworkId.TESTNET` in WalletManager
+3. **Configuration via env vars**: Network and wallet mode now controlled by environment variables
+
+## Recommended Next Actions
+
+1. **Create TestNet account in Pera** (if you haven't already)
+2. **Test on localhost** (`http://localhost:3000`)
+   - Connect Wallet → Scan QR → Select TestNet account
+3. **If it works locally**: Test on production (`https://aero-shield-lemon.vercel.app`)
+4. **Report back**:
+   - Does it work after creating TestNet account?
+   - Any new errors in browser console?
+   - Can you successfully select and connect a TestNet account?
+
+## Fallback Options (If Pera TestNet Still Fails)
+
+### Option A: Use Defly Wallet Instead
+```bash
+# In .env.local, change:
+NEXT_PUBLIC_CONNECT_MODE=defly-first
+# Then refresh and try connecting with Defly wallet
+```
+
+### Option B: Use ngrok Tunnel (Bypass Localhost)
+```bash
+# Run ngrok tunnel:
+ngrok http 3000
+
+# Use the ngrok URL in your mobile browser instead of localhost
+# This avoids localhost network issues
+```
+
+### Option C: Wait for Direct Pera Integration
+We can also explore if there's an issue with how use-wallet-react is handling TestNet requests, but the TestNet account requirement is the most likely issue.
+
+## Documentation Files Created
+
+- `NETWORK_MISMATCH_DIAGNOSTIC.md` - Full troubleshooting guide
+- `NETWORK_MISMATCH_FINAL_FIX.md` - Technical explanation
+- `VERCEL_ENV_SETUP.md` - Vercel environment setup
+- `WALLETCONNECT_FIX.md` - WalletConnect configuration guide
+
+## Summary of What Works
+
+✅ dApp correctly configured for TestNet
+✅ WalletManager using TestNet network
+✅ Pera wallet integration active
+✅ Dev server running and serving correctly
+✅ Production deployment on Vercel ready
+❌ Mobile wallet connection needs TestNet account to work
+
+---
+
+**Next**: Create a TestNet account in your mobile Pera wallet, then test the connection flow again.
