@@ -6,6 +6,9 @@ import {
   NetworkId,
 } from "@txnlab/use-wallet-react";
 
+const dappUrl =
+  process.env.NEXT_PUBLIC_DAPP_URL ?? "https://aeroshield.vercel.app";
+
 const manager = new WalletManager({
   wallets: [
     { id: WalletId.PERA },
@@ -17,7 +20,7 @@ const manager = new WalletManager({
         metadata: {
           name: "AeroShield",
           description: "Parametric flight delay insurance on Algorand",
-          url: "https://aeroshield.app",
+          url: dappUrl,
           icons: [],
         },
       },
