@@ -3,69 +3,187 @@
 
 // @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
 main:
-    // smart_contracts/hello_world/contract.algo.ts:3
+    intcblock 1 0 8 32
+    bytecblock "oracle"
+    // smart_contracts/hello_world/contract.algo.ts:4
     // export class HelloWorld extends Contract {
-    txn NumAppArgs
-    bz main___algots__.defaultCreate@5
-    pushbytes 0x02bece11 // method "hello(string)string"
+    txn OnCompletion
+    !
+    assert // OnCompletion must be NoOp
+    txn ApplicationID
+    bz main_create_NoOp@6
+    pushbytess 0x473f4740 0x962a003a // method "buyPolicy(pay,string,uint64,uint64)void", method "triggerPayout(address,uint64,string)void"
     txna ApplicationArgs 0
-    match main_hello_route@3
+    match buyPolicy triggerPayout
     err
 
-main_hello_route@3:
+main_create_NoOp@6:
     // smart_contracts/hello_world/contract.algo.ts:4
-    // hello(name: string): string {
-    txn OnCompletion
-    !
-    txn ApplicationID
-    &&
-    assert // OnCompletion must be NoOp && can only call when not creating
-    b hello
-
-main___algots__.defaultCreate@5:
-    // smart_contracts/hello_world/contract.algo.ts:3
     // export class HelloWorld extends Contract {
-    txn OnCompletion
-    !
-    txn ApplicationID
-    !
-    &&
-    assert // OnCompletion must be NoOp && can only call when creating
-    pushint 1 // 1
+    pushbytes 0xd324bea4 // method "createApplication(address)void"
+    txna ApplicationArgs 0
+    match createApplication
+    err
+
+
+// smart_contracts/hello_world/contract.algo.ts::HelloWorld.createApplication[routing]() -> void:
+createApplication:
+    // smart_contracts/hello_world/contract.algo.ts:7
+    // @abimethod({ onCreate: 'require' })
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/hello_world/contract.algo.ts:5
+    // oracle = GlobalState<Account>()
+    bytec_0 // "oracle"
+    // smart_contracts/hello_world/contract.algo.ts:9
+    // this.oracle.value = oracleAddr
+    swap
+    app_global_put
+    // smart_contracts/hello_world/contract.algo.ts:7
+    // @abimethod({ onCreate: 'require' })
+    intc_0 // 1
     return
 
 
-// smart_contracts/hello_world/contract.algo.ts::HelloWorld.hello[routing]() -> void:
-hello:
-    // smart_contracts/hello_world/contract.algo.ts:4
-    // hello(name: string): string {
+// smart_contracts/hello_world/contract.algo.ts::HelloWorld.buyPolicy[routing]() -> void:
+buyPolicy:
+    // smart_contracts/hello_world/contract.algo.ts:13
+    // @abimethod({ allowActions: ['NoOp'] })
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
     txna ApplicationArgs 1
     dup
-    pushint 0 // 0
+    intc_1 // 0
     extract_uint16 // on error: invalid array length header
     pushint 2 // 2
     +
-    dig 1
+    swap
     len
     ==
     assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
-    extract 2 0
-    // smart_contracts/hello_world/contract.algo.ts:5
-    // return `Hello, ${name}`
-    pushbytes "Hello, "
-    swap
-    concat
-    // smart_contracts/hello_world/contract.algo.ts:4
-    // hello(name: string): string {
+    txna ApplicationArgs 2
     dup
     len
-    itob
-    extract 6 2
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // smart_contracts/hello_world/contract.algo.ts:20
+    // assert(paymentTxn.sender === Txn.sender)
+    dig 2
+    gtxns Sender
+    txn Sender
+    ==
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:21
+    // assert(paymentTxn.receiver === Global.currentApplicationAddress)
+    dig 2
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:22
+    // assert(paymentTxn.amount > 0)
+    uncover 2
+    gtxns Amount
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:23
+    // assert(coverageAmount > 0)
     swap
-    concat
-    pushbytes 0x151f7c75
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:24
+    // assert(delayThreshold >= 60)
+    pushint 60 // 60
+    >=
+    // smart_contracts/hello_world/contract.algo.ts:13
+    // @abimethod({ allowActions: ['NoOp'] })
+    return
+
+
+// smart_contracts/hello_world/contract.algo.ts::HelloWorld.triggerPayout[routing]() -> void:
+triggerPayout:
+    // smart_contracts/hello_world/contract.algo.ts:28
+    // @abimethod({ allowActions: ['NoOp'] })
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    intc_1 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
     swap
-    concat
-    log
-    pushint 1 // 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    // smart_contracts/hello_world/contract.algo.ts:34
+    // assert(Txn.sender === this.oracle.value)
+    txn Sender
+    intc_1 // 0
+    // smart_contracts/hello_world/contract.algo.ts:5
+    // oracle = GlobalState<Account>()
+    bytec_0 // "oracle"
+    // smart_contracts/hello_world/contract.algo.ts:34
+    // assert(Txn.sender === this.oracle.value)
+    app_global_get_ex
+    assert // check GlobalState exists
+    ==
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:35
+    // assert(coverageAmount > 0)
+    dup
+    assert
+    // smart_contracts/hello_world/contract.algo.ts:37-41
+    // itxn.payment({
+    //   receiver: beneficiary,
+    //   amount: coverageAmount,
+    //   fee: 0,
+    // }).submit()
+    itxn_begin
+    itxn_field Amount
+    itxn_field Receiver
+    intc_0 // 1
+    itxn_field TypeEnum
+    // smart_contracts/hello_world/contract.algo.ts:40
+    // fee: 0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/hello_world/contract.algo.ts:37-41
+    // itxn.payment({
+    //   receiver: beneficiary,
+    //   amount: coverageAmount,
+    //   fee: 0,
+    // }).submit()
+    itxn_submit
+    // smart_contracts/hello_world/contract.algo.ts:28
+    // @abimethod({ allowActions: ['NoOp'] })
+    intc_0 // 1
     return

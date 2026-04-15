@@ -23,7 +23,7 @@ import { TransactionComposer, AppCallMethodCall, AppMethodCallTransactionArgumen
 import { SendParams, SendSingleTransactionResult, SendAtomicTransactionComposerResults } from '@algorandfoundation/algokit-utils/types/transaction'
 import { Address, encodeAddress, modelsv2, OnApplicationComplete, Transaction, TransactionSigner } from 'algosdk'
 
-export const APP_SPEC: Arc56Contract = {"name":"HelloWorld","structs":{},"methods":[{"name":"hello","args":[{"type":"string","name":"name"}],"returns":{"type":"string"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":0,"bytes":0},"local":{"ints":0,"bytes":0}},"keys":{"global":{},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{}}},"bareActions":{"create":["NoOp"],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[37],"errorMessage":"OnCompletion must be NoOp && can only call when creating"},{"pc":[26],"errorMessage":"OnCompletion must be NoOp && can only call when not creating"},{"pc":[47],"errorMessage":"invalid array length header"},{"pc":[55],"errorMessage":"invalid number of bytes for arc4.dynamic_array<arc4.uint8>"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYXJjNC9pbmRleC5kLnRzOjpDb250cmFjdC5hcHByb3ZhbFByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozCiAgICAvLyBleHBvcnQgY2xhc3MgSGVsbG9Xb3JsZCBleHRlbmRzIENvbnRyYWN0IHsKICAgIHR4biBOdW1BcHBBcmdzCiAgICBieiBtYWluX19fYWxnb3RzX18uZGVmYXVsdENyZWF0ZUA1CiAgICBwdXNoYnl0ZXMgMHgwMmJlY2UxMSAvLyBtZXRob2QgImhlbGxvKHN0cmluZylzdHJpbmciCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBtYWluX2hlbGxvX3JvdXRlQDMKICAgIGVycgoKbWFpbl9oZWxsb19yb3V0ZUAzOgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NAogICAgLy8gaGVsbG8obmFtZTogc3RyaW5nKTogc3RyaW5nIHsKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICAmJgogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBtdXN0IGJlIE5vT3AgJiYgY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgYiBoZWxsbwoKbWFpbl9fX2FsZ290c19fLmRlZmF1bHRDcmVhdGVANToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjMKICAgIC8vIGV4cG9ydCBjbGFzcyBIZWxsb1dvcmxkIGV4dGVuZHMgQ29udHJhY3QgewogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgICEKICAgICYmCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIG11c3QgYmUgTm9PcCAmJiBjYW4gb25seSBjYWxsIHdoZW4gY3JlYXRpbmcKICAgIHB1c2hpbnQgMSAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5oZWxsb1tyb3V0aW5nXSgpIC0+IHZvaWQ6CmhlbGxvOgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NAogICAgLy8gaGVsbG8obmFtZTogc3RyaW5nKTogc3RyaW5nIHsKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGR1cAogICAgcHVzaGludCAwIC8vIDAKICAgIGV4dHJhY3RfdWludDE2IC8vIG9uIGVycm9yOiBpbnZhbGlkIGFycmF5IGxlbmd0aCBoZWFkZXIKICAgIHB1c2hpbnQgMiAvLyAyCiAgICArCiAgICBkaWcgMQogICAgbGVuCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LmR5bmFtaWNfYXJyYXk8YXJjNC51aW50OD4KICAgIGV4dHJhY3QgMiAwCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo1CiAgICAvLyByZXR1cm4gYEhlbGxvLCAke25hbWV9YAogICAgcHVzaGJ5dGVzICJIZWxsbywgIgogICAgc3dhcAogICAgY29uY2F0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo0CiAgICAvLyBoZWxsbyhuYW1lOiBzdHJpbmcpOiBzdHJpbmcgewogICAgZHVwCiAgICBsZW4KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBzd2FwCiAgICBjb25jYXQKICAgIHB1c2hieXRlcyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgcHVzaGludCAxIC8vIDEKICAgIHJldHVybgo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYmFzZS1jb250cmFjdC5kLnRzOjpCYXNlQ29udHJhY3QuY2xlYXJTdGF0ZVByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBwdXNoaW50IDEgLy8gMQogICAgcmV0dXJuCg=="},"byteCode":{"approval":"CzEbQQAYgAQCvs4RNhoAjgEAAQAxGRQxGBBEQgALMRkUMRgUEESBAUM2GgFJgQBZgQIISwEVEkRXAgCAB0hlbGxvLCBMUEkVFlcGAkxQgAQVH3x1TFCwgQFD","clear":"C4EBQw=="},"events":[],"templateVariables":{}} as unknown as Arc56Contract
+export const APP_SPEC: Arc56Contract = {"name":"HelloWorld","structs":{},"methods":[{"name":"createApplication","args":[{"type":"address","name":"oracleAddr"}],"returns":{"type":"void"},"actions":{"create":["NoOp"],"call":[]},"readonly":false,"events":[],"recommendations":{}},{"name":"buyPolicy","args":[{"type":"pay","name":"paymentTxn"},{"type":"string","name":"flightNumber"},{"type":"uint64","name":"coverageAmount"},{"type":"uint64","name":"delayThreshold"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}},{"name":"triggerPayout","args":[{"type":"address","name":"beneficiary"},{"type":"uint64","name":"coverageAmount"},{"type":"string","name":"flightNumber"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":0,"bytes":1},"local":{"ints":0,"bytes":0}},"keys":{"global":{"oracle":{"keyType":"AVMString","valueType":"address","key":"b3JhY2xl"}},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{}}},"bareActions":{"create":[],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[19],"errorMessage":"OnCompletion must be NoOp"},{"pc":[177],"errorMessage":"check GlobalState exists"},{"pc":[89,164],"errorMessage":"invalid array length header"},{"pc":[96,171],"errorMessage":"invalid number of bytes for arc4.dynamic_array<arc4.uint8>"},{"pc":[68,149],"errorMessage":"invalid number of bytes for arc4.static_array<arc4.uint8, 32>"},{"pc":[104,113,157],"errorMessage":"invalid number of bytes for arc4.uint64"},{"pc":[83],"errorMessage":"transaction type is pay"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYXJjNC9pbmRleC5kLnRzOjpDb250cmFjdC5hcHByb3ZhbFByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBpbnRjYmxvY2sgMSAwIDggMzIKICAgIGJ5dGVjYmxvY2sgIm9yYWNsZSIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjQKICAgIC8vIGV4cG9ydCBjbGFzcyBIZWxsb1dvcmxkIGV4dGVuZHMgQ29udHJhY3QgewogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBtdXN0IGJlIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBieiBtYWluX2NyZWF0ZV9Ob09wQDYKICAgIHB1c2hieXRlc3MgMHg0NzNmNDc0MCAweDk2MmEwMDNhIC8vIG1ldGhvZCAiYnV5UG9saWN5KHBheSxzdHJpbmcsdWludDY0LHVpbnQ2NCl2b2lkIiwgbWV0aG9kICJ0cmlnZ2VyUGF5b3V0KGFkZHJlc3MsdWludDY0LHN0cmluZyl2b2lkIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggYnV5UG9saWN5IHRyaWdnZXJQYXlvdXQKICAgIGVycgoKbWFpbl9jcmVhdGVfTm9PcEA2OgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NAogICAgLy8gZXhwb3J0IGNsYXNzIEhlbGxvV29ybGQgZXh0ZW5kcyBDb250cmFjdCB7CiAgICBwdXNoYnl0ZXMgMHhkMzI0YmVhNCAvLyBtZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKGFkZHJlc3Mpdm9pZCIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIGNyZWF0ZUFwcGxpY2F0aW9uCiAgICBlcnIKCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5jcmVhdGVBcHBsaWNhdGlvbltyb3V0aW5nXSgpIC0+IHZvaWQ6CmNyZWF0ZUFwcGxpY2F0aW9uOgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NwogICAgLy8gQGFiaW1ldGhvZCh7IG9uQ3JlYXRlOiAncmVxdWlyZScgfSkKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGR1cAogICAgbGVuCiAgICBpbnRjXzMgLy8gMzIKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQuc3RhdGljX2FycmF5PGFyYzQudWludDgsIDMyPgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NQogICAgLy8gb3JhY2xlID0gR2xvYmFsU3RhdGU8QWNjb3VudD4oKQogICAgYnl0ZWNfMCAvLyAib3JhY2xlIgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6OQogICAgLy8gdGhpcy5vcmFjbGUudmFsdWUgPSBvcmFjbGVBZGRyCiAgICBzd2FwCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NwogICAgLy8gQGFiaW1ldGhvZCh7IG9uQ3JlYXRlOiAncmVxdWlyZScgfSkKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5idXlQb2xpY3lbcm91dGluZ10oKSAtPiB2b2lkOgpidXlQb2xpY3k6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoxMwogICAgLy8gQGFiaW1ldGhvZCh7IGFsbG93QWN0aW9uczogWydOb09wJ10gfSkKICAgIHR4biBHcm91cEluZGV4CiAgICBpbnRjXzAgLy8gMQogICAgLQogICAgZHVwCiAgICBndHhucyBUeXBlRW51bQogICAgaW50Y18wIC8vIHBheQogICAgPT0KICAgIGFzc2VydCAvLyB0cmFuc2FjdGlvbiB0eXBlIGlzIHBheQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBpbnRjXzEgLy8gMAogICAgZXh0cmFjdF91aW50MTYgLy8gb24gZXJyb3I6IGludmFsaWQgYXJyYXkgbGVuZ3RoIGhlYWRlcgogICAgcHVzaGludCAyIC8vIDIKICAgICsKICAgIHN3YXAKICAgIGxlbgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5keW5hbWljX2FycmF5PGFyYzQudWludDg+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoyMAogICAgLy8gYXNzZXJ0KHBheW1lbnRUeG4uc2VuZGVyID09PSBUeG4uc2VuZGVyKQogICAgZGlnIDIKICAgIGd0eG5zIFNlbmRlcgogICAgdHhuIFNlbmRlcgogICAgPT0KICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MjEKICAgIC8vIGFzc2VydChwYXltZW50VHhuLnJlY2VpdmVyID09PSBHbG9iYWwuY3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcykKICAgIGRpZyAyCiAgICBndHhucyBSZWNlaXZlcgogICAgZ2xvYmFsIEN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MKICAgID09CiAgICBhc3NlcnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjIyCiAgICAvLyBhc3NlcnQocGF5bWVudFR4bi5hbW91bnQgPiAwKQogICAgdW5jb3ZlciAyCiAgICBndHhucyBBbW91bnQKICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MjMKICAgIC8vIGFzc2VydChjb3ZlcmFnZUFtb3VudCA+IDApCiAgICBzd2FwCiAgICBhc3NlcnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI0CiAgICAvLyBhc3NlcnQoZGVsYXlUaHJlc2hvbGQgPj0gNjApCiAgICBwdXNoaW50IDYwIC8vIDYwCiAgICA+PQogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MTMKICAgIC8vIEBhYmltZXRob2QoeyBhbGxvd0FjdGlvbnM6IFsnTm9PcCddIH0pCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC50cmlnZ2VyUGF5b3V0W3JvdXRpbmddKCkgLT4gdm9pZDoKdHJpZ2dlclBheW91dDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI4CiAgICAvLyBAYWJpbWV0aG9kKHsgYWxsb3dBY3Rpb25zOiBbJ05vT3AnXSB9KQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBsZW4KICAgIGludGNfMyAvLyAzMgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5zdGF0aWNfYXJyYXk8YXJjNC51aW50OCwgMzI+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBkdXAKICAgIGludGNfMSAvLyAwCiAgICBleHRyYWN0X3VpbnQxNiAvLyBvbiBlcnJvcjogaW52YWxpZCBhcnJheSBsZW5ndGggaGVhZGVyCiAgICBwdXNoaW50IDIgLy8gMgogICAgKwogICAgc3dhcAogICAgbGVuCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LmR5bmFtaWNfYXJyYXk8YXJjNC51aW50OD4KICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjM0CiAgICAvLyBhc3NlcnQoVHhuLnNlbmRlciA9PT0gdGhpcy5vcmFjbGUudmFsdWUpCiAgICB0eG4gU2VuZGVyCiAgICBpbnRjXzEgLy8gMAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NQogICAgLy8gb3JhY2xlID0gR2xvYmFsU3RhdGU8QWNjb3VudD4oKQogICAgYnl0ZWNfMCAvLyAib3JhY2xlIgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MzQKICAgIC8vIGFzc2VydChUeG4uc2VuZGVyID09PSB0aGlzLm9yYWNsZS52YWx1ZSkKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgR2xvYmFsU3RhdGUgZXhpc3RzCiAgICA9PQogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNQogICAgLy8gYXNzZXJ0KGNvdmVyYWdlQW1vdW50ID4gMCkKICAgIGR1cAogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNy00MQogICAgLy8gaXR4bi5wYXltZW50KHsKICAgIC8vICAgcmVjZWl2ZXI6IGJlbmVmaWNpYXJ5LAogICAgLy8gICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICBmZWU6IDAsCiAgICAvLyB9KS5zdWJtaXQoKQogICAgaXR4bl9iZWdpbgogICAgaXR4bl9maWVsZCBBbW91bnQKICAgIGl0eG5fZmllbGQgUmVjZWl2ZXIKICAgIGludGNfMCAvLyAxCiAgICBpdHhuX2ZpZWxkIFR5cGVFbnVtCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo0MAogICAgLy8gZmVlOiAwLAogICAgaW50Y18xIC8vIDAKICAgIGl0eG5fZmllbGQgRmVlCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNy00MQogICAgLy8gaXR4bi5wYXltZW50KHsKICAgIC8vICAgcmVjZWl2ZXI6IGJlbmVmaWNpYXJ5LAogICAgLy8gICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICBmZWU6IDAsCiAgICAvLyB9KS5zdWJtaXQoKQogICAgaXR4bl9zdWJtaXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI4CiAgICAvLyBAYWJpbWV0aG9kKHsgYWxsb3dBY3Rpb25zOiBbJ05vT3AnXSB9KQogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYmFzZS1jb250cmFjdC5kLnRzOjpCYXNlQ29udHJhY3QuY2xlYXJTdGF0ZVByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBwdXNoaW50IDEgLy8gMQogICAgcmV0dXJuCg=="},"byteCode":{"approval":"CyAEAQAIICYBBm9yYWNsZTEZFEQxGEEAFoICBEc/R0AElioAOjYaAI4CABwAYACABNMkvqQ2GgCOAQABADYaAUkVJRJEKExnIkMxFiIJSTgQIhJENhoBSSNZgQIITBUSRDYaAkkVJBJEFzYaA0kVJBJEF0sCOAAxABJESwI4BzIKEkRPAjgIRExEgTwPQzYaAUkVJRJENhoCSRUkEkQXNhoDSSNZgQIITBUSRDEAIyhlRBJESUSxsgiyByKyECOyAbMiQw==","clear":"C4EBQw=="},"events":[],"templateVariables":{}} as unknown as Arc56Contract
 
 /**
  * A state record containing binary data
@@ -70,15 +70,28 @@ export type HelloWorldArgs = {
    * The object representation of the arguments for each method
    */
   obj: {
-    'hello(string)string': {
-      name: string
+    'createApplication(address)void': {
+      oracleAddr: string
+    }
+    'buyPolicy(pay,string,uint64,uint64)void': {
+      paymentTxn: AppMethodCallTransactionArgument
+      flightNumber: string
+      coverageAmount: bigint | number
+      delayThreshold: bigint | number
+    }
+    'triggerPayout(address,uint64,string)void': {
+      beneficiary: string
+      coverageAmount: bigint | number
+      flightNumber: string
     }
   }
   /**
    * The tuple representation of the arguments for each method
    */
   tuple: {
-    'hello(string)string': [name: string]
+    'createApplication(address)void': [oracleAddr: string]
+    'buyPolicy(pay,string,uint64,uint64)void': [paymentTxn: AppMethodCallTransactionArgument, flightNumber: string, coverageAmount: bigint | number, delayThreshold: bigint | number]
+    'triggerPayout(address,uint64,string)void': [beneficiary: string, coverageAmount: bigint | number, flightNumber: string]
   }
 }
 
@@ -86,7 +99,9 @@ export type HelloWorldArgs = {
  * The return type for each method
  */
 export type HelloWorldReturns = {
-  'hello(string)string': string
+  'createApplication(address)void': void
+  'buyPolicy(pay,string,uint64,uint64)void': void
+  'triggerPayout(address,uint64,string)void': void
 }
 
 /**
@@ -97,21 +112,38 @@ export type HelloWorldTypes = {
    * Maps method signatures / names to their argument and return types.
    */
   methods:
-    & Record<'hello(string)string' | 'hello', {
-      argsObj: HelloWorldArgs['obj']['hello(string)string']
-      argsTuple: HelloWorldArgs['tuple']['hello(string)string']
-      returns: HelloWorldReturns['hello(string)string']
+    & Record<'createApplication(address)void' | 'createApplication', {
+      argsObj: HelloWorldArgs['obj']['createApplication(address)void']
+      argsTuple: HelloWorldArgs['tuple']['createApplication(address)void']
+      returns: HelloWorldReturns['createApplication(address)void']
     }>
+    & Record<'buyPolicy(pay,string,uint64,uint64)void' | 'buyPolicy', {
+      argsObj: HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void']
+      argsTuple: HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']
+      returns: HelloWorldReturns['buyPolicy(pay,string,uint64,uint64)void']
+    }>
+    & Record<'triggerPayout(address,uint64,string)void' | 'triggerPayout', {
+      argsObj: HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void']
+      argsTuple: HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']
+      returns: HelloWorldReturns['triggerPayout(address,uint64,string)void']
+    }>
+  /**
+   * Defines the shape of the state of the application.
+   */
+  state: {
+    global: {
+      keys: {
+        oracle: string
+      }
+      maps: {}
+    }
+  }
 }
 
 /**
  * Defines the possible abi call signatures.
  */
 export type HelloWorldSignatures = keyof HelloWorldTypes['methods']
-/**
- * Defines the possible abi call signatures for methods that return a non-void value.
- */
-export type HelloWorldNonVoidMethodSignatures = keyof HelloWorldTypes['methods'] extends infer T ? T extends keyof HelloWorldTypes['methods'] ? MethodReturn<T> extends void ? never : T  : never : never
 /**
  * Defines an object containing all relevant parameters for a single call to the contract.
  */
@@ -131,12 +163,18 @@ export type MethodArgs<TSignature extends HelloWorldSignatures> = HelloWorldType
  */
 export type MethodReturn<TSignature extends HelloWorldSignatures> = HelloWorldTypes['methods'][TSignature]['returns']
 
+/**
+ * Defines the shape of the keyed global state of the application.
+ */
+export type GlobalKeysState = HelloWorldTypes['state']['global']['keys']
+
 
 /**
  * Defines supported create method params for this smart contract
  */
 export type HelloWorldCreateCallParams =
-  | Expand<AppClientBareCallParams & {method?: never} & {onComplete?: OnApplicationComplete.NoOpOC} & CreateSchema>
+  | Expand<CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & {method: 'createApplication'} & {onComplete?: OnApplicationComplete.NoOpOC} & CreateSchema>
+  | Expand<CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & {method: 'createApplication(address)void'} & {onComplete?: OnApplicationComplete.NoOpOC} & CreateSchema>
 /**
  * Defines arguments required for the deploy method.
  */
@@ -153,16 +191,59 @@ export type HelloWorldDeployParams = Expand<Omit<AppFactoryDeployParams, 'create
  */
 export abstract class HelloWorldParamsFactory {
   /**
-   * Constructs a no op call for the hello(string)string ABI method
+   * Gets available create ABI call param factories
+   */
+  static get create() {
+    return {
+      _resolveByMethod<TParams extends HelloWorldCreateCallParams & {method: string}>(params: TParams) {
+        switch(params.method) {
+          case 'createApplication':
+          case 'createApplication(address)void':
+            return HelloWorldParamsFactory.create.createApplication(params)
+        }
+        throw new Error(`Unknown ' + verb + ' method`)
+      },
+
+      /**
+       * Constructs create ABI call params for the HelloWorld smart contract using the createApplication(address)void ABI method
+       *
+       * @param params Parameters for the call
+       * @returns An `AppClientMethodCallParams` object for the call
+       */
+      createApplication(params: CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & AppClientCompilationParams & {onComplete?: OnApplicationComplete.NoOpOC}): AppClientMethodCallParams & AppClientCompilationParams & {onComplete?: OnApplicationComplete.NoOpOC} {
+        return {
+          ...params,
+          method: 'createApplication(address)void' as const,
+          args: Array.isArray(params.args) ? params.args : [params.args.oracleAddr],
+        }
+      },
+    }
+  }
+
+  /**
+   * Constructs a no op call for the buyPolicy(pay,string,uint64,uint64)void ABI method
    *
    * @param params Parameters for the call
    * @returns An `AppClientMethodCallParams` object for the call
    */
-  static hello(params: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
+  static buyPolicy(params: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
     return {
       ...params,
-      method: 'hello(string)string' as const,
-      args: Array.isArray(params.args) ? params.args : [params.args.name],
+      method: 'buyPolicy(pay,string,uint64,uint64)void' as const,
+      args: Array.isArray(params.args) ? params.args : [params.args.paymentTxn, params.args.flightNumber, params.args.coverageAmount, params.args.delayThreshold],
+    }
+  }
+  /**
+   * Constructs a no op call for the triggerPayout(address,uint64,string)void ABI method
+   *
+   * @param params Parameters for the call
+   * @returns An `AppClientMethodCallParams` object for the call
+   */
+  static triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
+    return {
+      ...params,
+      method: 'triggerPayout(address,uint64,string)void' as const,
+      args: Array.isArray(params.args) ? params.args : [params.args.beneficiary, params.args.coverageAmount, params.args.flightNumber],
     }
   }
 }
@@ -239,6 +320,7 @@ export class HelloWorldFactory {
   public async deploy(params: HelloWorldDeployParams = {}) {
     const result = await this.appFactory.deploy({
       ...params,
+      createParams: params.createParams?.method ? HelloWorldParamsFactory.create._resolveByMethod(params.createParams) : params.createParams ? params.createParams as (HelloWorldCreateCallParams & { args: Uint8Array[] }) : undefined,
     })
     return { result: result.result, appClient: new HelloWorldClient(result.appClient) }
   }
@@ -252,13 +334,13 @@ export class HelloWorldFactory {
      */
     create: {
       /**
-       * Creates a new instance of the HelloWorld smart contract using a bare call.
+       * Creates a new instance of the HelloWorld smart contract using the createApplication(address)void ABI method.
        *
-       * @param params The params for the bare (raw) call
-       * @returns The params for a create call
+       * @param params The params for the smart contract call
+       * @returns The create params
        */
-      bare: (params?: Expand<AppClientBareCallParams & AppClientCompilationParams & CreateSchema & {onComplete?: OnApplicationComplete.NoOpOC}>) => {
-        return this.appFactory.params.bare.create(params)
+      createApplication: (params: CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & AppClientCompilationParams & CreateSchema & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+        return this.appFactory.params.create(HelloWorldParamsFactory.create.createApplication(params))
       },
     },
 
@@ -273,13 +355,13 @@ export class HelloWorldFactory {
      */
     create: {
       /**
-       * Creates a new instance of the HelloWorld smart contract using a bare call.
+       * Creates a new instance of the HelloWorld smart contract using the createApplication(address)void ABI method.
        *
-       * @param params The params for the bare (raw) call
-       * @returns The transaction for a create call
+       * @param params The params for the smart contract call
+       * @returns The create transaction
        */
-      bare: (params?: Expand<AppClientBareCallParams & AppClientCompilationParams & CreateSchema & {onComplete?: OnApplicationComplete.NoOpOC}>) => {
-        return this.appFactory.createTransaction.bare.create(params)
+      createApplication: (params: CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & AppClientCompilationParams & CreateSchema & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+        return this.appFactory.createTransaction.create(HelloWorldParamsFactory.create.createApplication(params))
       },
     },
 
@@ -294,14 +376,14 @@ export class HelloWorldFactory {
      */
     create: {
       /**
-       * Creates a new instance of the HelloWorld smart contract using a bare call.
+       * Creates a new instance of the HelloWorld smart contract using an ABI method call using the createApplication(address)void ABI method.
        *
-       * @param params The params for the bare (raw) call
+       * @param params The params for the smart contract call
        * @returns The create result
        */
-      bare: async (params?: Expand<AppClientBareCallParams & AppClientCompilationParams & CreateSchema & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}>) => {
-        const result = await this.appFactory.send.bare.create(params)
-        return { result: result.result, appClient: new HelloWorldClient(result.appClient) }
+      createApplication: async (params: CallParams<HelloWorldArgs['obj']['createApplication(address)void'] | HelloWorldArgs['tuple']['createApplication(address)void']> & AppClientCompilationParams & CreateSchema & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+        const result = await this.appFactory.send.create(HelloWorldParamsFactory.create.createApplication(params))
+        return { result: { ...result.result, return: result.result.return as unknown as (undefined | HelloWorldReturns['createApplication(address)void']) }, appClient: new HelloWorldClient(result.appClient) }
       },
     },
 
@@ -334,14 +416,6 @@ export class HelloWorldClient {
       ...appClientOrParams,
       appSpec: APP_SPEC,
     })
-  }
-
-  /**
-   * Checks for decode errors on the given return value and maps the return value to the return type for the given method
-   * @returns The typed return value or undefined if there was no value
-   */
-  decodeReturnValue<TSignature extends HelloWorldNonVoidMethodSignatures>(method: TSignature, returnValue: ABIReturn | undefined) {
-    return returnValue !== undefined ? getArc56ReturnValue<MethodReturn<TSignature>>(returnValue, this.appClient.getABIMethod(method), APP_SPEC.structs) : undefined
   }
 
   /**
@@ -406,13 +480,23 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `hello(string)string` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `buyPolicy(pay,string,uint64,uint64)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call params
      */
-    hello: (params: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
-      return this.appClient.params.call(HelloWorldParamsFactory.hello(params))
+    buyPolicy: (params: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      return this.appClient.params.call(HelloWorldParamsFactory.buyPolicy(params))
+    },
+
+    /**
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     *
+     * @param params The params for the smart contract call
+     * @returns The call params
+     */
+    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      return this.appClient.params.call(HelloWorldParamsFactory.triggerPayout(params))
     },
 
   }
@@ -432,13 +516,23 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `hello(string)string` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `buyPolicy(pay,string,uint64,uint64)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call transaction
      */
-    hello: (params: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
-      return this.appClient.createTransaction.call(HelloWorldParamsFactory.hello(params))
+    buyPolicy: (params: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      return this.appClient.createTransaction.call(HelloWorldParamsFactory.buyPolicy(params))
+    },
+
+    /**
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     *
+     * @param params The params for the smart contract call
+     * @returns The call transaction
+     */
+    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      return this.appClient.createTransaction.call(HelloWorldParamsFactory.triggerPayout(params))
     },
 
   }
@@ -458,14 +552,25 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `hello(string)string` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `buyPolicy(pay,string,uint64,uint64)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call result
      */
-    hello: async (params: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
-      const result = await this.appClient.send.call(HelloWorldParamsFactory.hello(params))
-      return {...result, return: result.return as unknown as (undefined | HelloWorldReturns['hello(string)string'])}
+    buyPolicy: async (params: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      const result = await this.appClient.send.call(HelloWorldParamsFactory.buyPolicy(params))
+      return {...result, return: result.return as unknown as (undefined | HelloWorldReturns['buyPolicy(pay,string,uint64,uint64)void'])}
+    },
+
+    /**
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     *
+     * @param params The params for the smart contract call
+     * @returns The call result
+     */
+    triggerPayout: async (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+      const result = await this.appClient.send.call(HelloWorldParamsFactory.triggerPayout(params))
+      return {...result, return: result.return as unknown as (undefined | HelloWorldReturns['triggerPayout(address,uint64,string)void'])}
     },
 
   }
@@ -484,6 +589,24 @@ export class HelloWorldClient {
    * Methods to access state for the current HelloWorld app
    */
   state = {
+    /**
+     * Methods to access global state for the current HelloWorld app
+     */
+    global: {
+      /**
+       * Get all current keyed values from global state
+       */
+      getAll: async (): Promise<Partial<Expand<GlobalKeysState>>> => {
+        const result = await this.appClient.state.global.getAll()
+        return {
+          oracle: result.oracle,
+        }
+      },
+      /**
+       * Get the current value of the oracle key in global state
+       */
+      oracle: async (): Promise<string | undefined> => { return (await this.appClient.state.global.getValue("oracle")) as string | undefined },
+    },
   }
 
   public newGroup(): HelloWorldComposer {
@@ -493,11 +616,19 @@ export class HelloWorldClient {
     const resultMappers: Array<undefined | ((x: ABIReturn | undefined) => any)> = []
     return {
       /**
-       * Add a hello(string)string method call against the HelloWorld contract
+       * Add a buyPolicy(pay,string,uint64,uint64)void method call against the HelloWorld contract
        */
-      hello(params: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
-        promiseChain = promiseChain.then(async () => composer.addAppCallMethodCall(await client.params.hello(params)))
-        resultMappers.push((v) => client.decodeReturnValue('hello(string)string', v))
+      buyPolicy(params: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
+        promiseChain = promiseChain.then(async () => composer.addAppCallMethodCall(await client.params.buyPolicy(params)))
+        resultMappers.push(undefined)
+        return this
+      },
+      /**
+       * Add a triggerPayout(address,uint64,string)void method call against the HelloWorld contract
+       */
+      triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
+        promiseChain = promiseChain.then(async () => composer.addAppCallMethodCall(await client.params.triggerPayout(params)))
+        resultMappers.push(undefined)
         return this
       },
       /**
@@ -536,13 +667,22 @@ export class HelloWorldClient {
 }
 export type HelloWorldComposer<TReturns extends [...any[]] = []> = {
   /**
-   * Calls the hello(string)string ABI method.
+   * Calls the buyPolicy(pay,string,uint64,uint64)void ABI method.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
    */
-  hello(params?: CallParams<HelloWorldArgs['obj']['hello(string)string'] | HelloWorldArgs['tuple']['hello(string)string']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['hello(string)string'] | undefined]>
+  buyPolicy(params?: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['buyPolicy(pay,string,uint64,uint64)void'] | undefined]>
+
+  /**
+   * Calls the triggerPayout(address,uint64,string)void ABI method.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  triggerPayout(params?: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['triggerPayout(address,uint64,string)void'] | undefined]>
 
   /**
    * Makes a clear_state call to an existing instance of the HelloWorld smart contract.

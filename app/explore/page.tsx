@@ -123,7 +123,7 @@ export default function ExplorePage() {
             One protocol,{' '}
             <span className="text-gradient">infinite triggers.</span>
           </h1>
-          <p className="text-zinc-300 max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="text-slate-700 max-w-2xl mx-auto text-lg leading-relaxed">
             AeroShield is not just flight insurance. It's a parametric insurance infrastructure layer —
             any real-world data point can become a trigger. Here's what we're building.
           </p>
@@ -149,24 +149,24 @@ export default function ExplorePage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-3 mb-1">
-                          <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>{product.title}</h2>
-                          <Badge variant="secondary" className="text-zinc-300 border-zinc-500 text-xs font-medium">{product.category}</Badge>
+                          <h2 className="text-xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>{product.title}</h2>
+                          <Badge variant="secondary" className="text-slate-700 border-zinc-500 text-xs font-medium">{product.category}</Badge>
                           {product.status === 'live' ? (
                             <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs">
                               Live on Testnet
                             </Badge>
                           ) : (
-                            <Badge className="bg-zinc-800 text-zinc-300 border-zinc-600 text-xs font-medium">Coming Soon</Badge>
+                            <Badge className="bg-zinc-800 text-slate-200 border-zinc-600 text-xs font-medium">Coming Soon</Badge>
                           )}
                         </div>
-                        <p className="text-zinc-300 text-sm leading-relaxed">{product.desc}</p>
+                        <p className="text-slate-700 text-sm leading-relaxed">{product.desc}</p>
                       </div>
                     </div>
 
                     {/* Features */}
                     <div className="grid grid-cols-2 gap-2">
                       {product.features.map(feature => (
-                        <div key={feature} className="flex items-center gap-2 text-sm text-zinc-300">
+                        <div key={feature} className="flex items-center gap-2 text-sm text-slate-700">
                           <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${colorMap[product.color]}`} />
                           {feature}
                         </div>
@@ -176,7 +176,7 @@ export default function ExplorePage() {
 
                   {/* Right: specs */}
                   <div className="glass rounded-xl p-5 space-y-3 self-start">
-                    <p className="text-xs uppercase tracking-widest text-zinc-300 font-medium mb-3">Policy specs</p>
+                    <p className="text-xs uppercase tracking-widest text-slate-700 font-medium mb-3">Policy specs</p>
                     {[
                       { icon: Zap,    label: 'Trigger',     value: product.trigger },
                       { icon: Globe,  label: 'Data source', value: product.dataSource },
@@ -186,8 +186,8 @@ export default function ExplorePage() {
                       <div key={spec.label} className="flex items-start gap-2.5">
                         <spec.icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colorMap[product.color]}`} />
                         <div>
-                          <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">{spec.label}</p>
-                          <p className="text-xs text-zinc-300">{spec.value}</p>
+                          <p className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold">{spec.label}</p>
+                          <p className="text-xs text-slate-600">{spec.value}</p>
                         </div>
                       </div>
                     ))}
@@ -200,7 +200,7 @@ export default function ExplorePage() {
                         </Button>
                       </Link>
                     ) : (
-                      <Button size="sm" variant="outline" className="w-full mt-4 border-white/10 text-zinc-500 gap-2" disabled>
+                      <Button size="sm" variant="outline" className="w-full mt-4 border-white/10 text-slate-700 gap-2" disabled>
                         Notify me when live
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Button>
@@ -220,7 +220,7 @@ export default function ExplorePage() {
             <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: 'Syne, sans-serif' }}>
               Build your own parametric product
             </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto mb-8 text-sm leading-relaxed">
+            <p className="text-slate-700 max-w-xl mx-auto mb-8 text-sm leading-relaxed">
               AeroShield exposes a composable smart contract API. Plug in any oracle data source,
               set your own trigger logic, and launch a parametric insurance product in days — not months.
             </p>
@@ -231,7 +231,7 @@ export default function ExplorePage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Button variant="outline" className="border-white/10 text-zinc-400 hover:text-white gap-2">
+              <Button variant="outline" className="border-white/10 text-slate-700 hover:text-slate-900 gap-2">
                 <Globe className="w-4 h-4" />
                 View on GitHub
               </Button>

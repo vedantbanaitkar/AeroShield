@@ -40,19 +40,47 @@ export function Navbar() {
     : null;
   const showConnectedWallet = isHydrated && !!activeAccount;
 
-  function handleConnect() {
+  function isConnectCancelledError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return /modal is closed by user|cancelled|canceled|rejected|proposal expired|session expired/i.test(message.toLowerCase());
+  }
+
+  async function tryConnect(walletId: string): Promise<"connected" | "cancelled" | "failed"> {
+    const wallet = wallets?.find((w) => w.id === walletId);
+    if (!wallet) return "failed";
+
+    try {
+      await wallet.connect();
+      return "connected";
+    } catch (error) {
+      if (isConnectCancelledError(error)) {
+        return "cancelled";
+      }
+
+      console.error(`Failed to connect with ${walletId}:`, error);
+      return "failed";
+    }
+  }
+
+  async function handleConnect() {
     const preferredOrder =
       connectMode === "walletconnect-first"
         ? ["walletconnect", "pera", "defly"]
         : ["pera", "defly", "walletconnect"];
 
     for (const walletId of preferredOrder) {
-      const wallet = wallets?.find((w) => w.id === walletId);
-      if (wallet) {
-        wallet.connect();
+      const result = await tryConnect(walletId);
+      if (result === "connected") {
+        return;
+      }
+      if (result === "cancelled") {
         return;
       }
     }
+
+    const fallback = wallets?.[0];
+    if (!fallback) return;
+    await tryConnect(fallback.id);
   }
   function handleDisconnect() {
     wallets?.find((w) => w.isActive)?.disconnect();

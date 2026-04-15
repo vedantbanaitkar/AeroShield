@@ -11,17 +11,33 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { policyRepository } from '@/lib/policies'
 import algosdk from 'algosdk'
 
 const APP_ID = Number(process.env.NEXT_PUBLIC_APP_ID ?? 0)
 
 type FlowStep = 'form' | 'confirm' | 'signing' | 'monitoring' | 'checking' | 'paying' | 'done' | 'error'
+type InsuranceType = 'flight' | 'weather' | 'cargo'
+type FlightDelayThreshold = 90 | 120 | 180
 
 interface Policy {
+  policyRecordId?: string
+  productId: InsuranceType
+  productLabel: string
   flightNumber: string
+  delayThreshold?: FlightDelayThreshold
+  region?: string
+  cropType?: string
+  routeFrom?: string
+  routeTo?: string
+  cargoValue?: number
   coverage: number
   premium: number
   walletAddress: string
+  summary: Array<{ label: string; value: string; mono?: boolean }>
+  triggerDescription: string
+  appId: number
+  appCallTxId?: string
   txId?: string
   delayMinutes?: number
   payoutTxId?: string
@@ -30,17 +46,169 @@ interface Policy {
   balanceAfterPayout?: number
 }
 
-const COVERAGE_OPTIONS = [5, 10, 25, 50, 100]
+interface ProductConfig {
+  id: InsuranceType
+  title: string
+  subtitle: string
+  coverageOptions: number[]
+  defaultCoverage: number
+  accent: 'cyan' | 'emerald' | 'violet'
+  summaryLine: string
+  isOnChainReady: boolean
+}
+
+const INSURANCE_PRODUCTS: ProductConfig[] = [
+  {
+    id: 'flight',
+    title: 'Flight Delay',
+    subtitle: 'Airport-to-wallet coverage for delayed departures',
+    coverageOptions: [5, 10, 25, 50, 100],
+    defaultCoverage: 10,
+    accent: 'cyan',
+    summaryLine: 'Departure delay threshold',
+    isOnChainReady: true,
+  },
+  {
+    id: 'weather',
+    title: 'Crop Weather',
+    subtitle: 'Yield protection for rainfall and monsoon risk',
+    coverageOptions: [100, 250, 500, 1000, 2500],
+    defaultCoverage: 250,
+    accent: 'emerald',
+    summaryLine: 'Rainfall strike trigger',
+    isOnChainReady: false,
+  },
+  {
+    id: 'cargo',
+    title: 'Cargo & Freight',
+    subtitle: 'Shipment delay cover for exporters and importers',
+    coverageOptions: [25, 50, 100, 250, 500],
+    defaultCoverage: 50,
+    accent: 'violet',
+    summaryLine: 'Route delay trigger',
+    isOnChainReady: false,
+  },
+]
+
+function getProductConfig(productId: InsuranceType) {
+  return INSURANCE_PRODUCTS.find(product => product.id === productId) ?? INSURANCE_PRODUCTS[0]
+}
+
+function getCoverageMultiplier(productId: InsuranceType, formState: {
+  delayThreshold: FlightDelayThreshold
+  region: string
+  cropType: string
+  routeFrom: string
+  routeTo: string
+  cargoValue: string
+}) {
+  if (productId === 'flight') {
+    return formState.delayThreshold === 90 ? 0.9 : formState.delayThreshold === 180 ? 1.2 : 1
+  }
+
+  if (productId === 'weather') {
+    const regionFactor = formState.region.toLowerCase().includes('coastal') ? 1.25 : formState.region.toLowerCase().includes('monsoon') ? 1.15 : 1
+    const cropFactor = formState.cropType === 'Rice' ? 1.12 : formState.cropType === 'Cotton' ? 1.08 : 1
+    return regionFactor * cropFactor
+  }
+
+  const cargoValue = Number(formState.cargoValue || 0)
+  const valueFactor = cargoValue >= 20000 ? 1.25 : cargoValue >= 10000 ? 1.15 : 1
+  const routeFactor = formState.routeFrom !== formState.routeTo ? 1.05 : 1.2
+  return valueFactor * routeFactor
+}
+
+function calculatePremium(productId: InsuranceType, coverage: number, formState: {
+  delayThreshold: FlightDelayThreshold
+  region: string
+  cropType: string
+  routeFrom: string
+  routeTo: string
+  cargoValue: string
+}) {
+  const baseRate = productId === 'flight' ? 0.05 : productId === 'weather' ? 0.035 : 0.04
+  const premium = coverage * baseRate * getCoverageMultiplier(productId, formState)
+  return +premium.toFixed(2)
+}
+
+function buildSummary(productId: InsuranceType, coverage: number, premium: number, formState: {
+  flightNumber: string
+  delayThreshold: FlightDelayThreshold
+  region: string
+  cropType: string
+  routeFrom: string
+  routeTo: string
+  cargoValue: string
+}) {
+  if (productId === 'flight') {
+    return [
+      { label: 'Flight', value: formState.flightNumber, mono: true },
+      { label: 'Coverage', value: `${coverage} ALGO` },
+      { label: 'Premium', value: `${premium} ALGO` },
+      { label: 'Trigger threshold', value: `≥ ${formState.delayThreshold} minute delay` },
+      { label: 'Payout method', value: 'Atomic inner transaction' },
+      { label: 'Network', value: 'Algorand TestNet' },
+    ]
+  }
+
+  if (productId === 'weather') {
+    return [
+      { label: 'Region', value: formState.region },
+      { label: 'Crop', value: formState.cropType },
+      { label: 'Coverage', value: `${coverage} ALGO` },
+      { label: 'Premium', value: `${premium} ALGO` },
+      { label: 'Trigger threshold', value: 'Rainfall strike breached' },
+      { label: 'Network', value: 'Algorand TestNet' },
+    ]
+  }
+
+  return [
+    { label: 'Route', value: `${formState.routeFrom} → ${formState.routeTo}`, mono: true },
+    { label: 'Cargo value', value: `${formState.cargoValue} ALGO` },
+    { label: 'Coverage', value: `${coverage} ALGO` },
+    { label: 'Premium', value: `${premium} ALGO` },
+    { label: 'Trigger threshold', value: 'Route delay or disruption' },
+    { label: 'Network', value: 'Algorand TestNet' },
+  ]
+}
 
 export default function AppPage() {
   const { activeAccount, wallets, signTransactions } = useWallet()
+  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? 'pera-first'
+  const [isHydrated, setIsHydrated] = useState(false)
+  const [productId, setProductId] = useState<InsuranceType>('flight')
   const [step, setStep] = useState<FlowStep>('form')
   const [policy, setPolicy] = useState<Policy | null>(null)
   const [flightNumber, setFlightNumber] = useState('AI302')
+  const [delayThreshold, setDelayThreshold] = useState<FlightDelayThreshold>(120)
+  const [region, setRegion] = useState('Coastal Karnataka')
+  const [cropType, setCropType] = useState('Rice')
+  const [routeFrom, setRouteFrom] = useState('BOM')
+  const [routeTo, setRouteTo] = useState('DEL')
+  const [cargoValue, setCargoValue] = useState('5000')
   const [coverage, setCoverage] = useState(10)
   const [errorMsg, setErrorMsg] = useState('')
   const [mockDelay, setMockDelay] = useState(false)
   const [walletBalance, setWalletBalance] = useState<number | null>(null)
+  const selectedProduct = getProductConfig(productId)
+  const premium = calculatePremium(productId, coverage, {
+    delayThreshold,
+    region,
+    cropType,
+    routeFrom,
+    routeTo,
+    cargoValue,
+  })
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    const defaultCoverage = getProductConfig(productId).defaultCoverage
+    setCoverage(defaultCoverage)
+    setStep('form')
+  }, [productId])
 
   // Fetch wallet balance when account connects
   useEffect(() => {
@@ -68,15 +236,58 @@ export default function AppPage() {
     return () => clearInterval(interval)
   }, [activeAccount])
 
-  const premium = +(coverage * 0.05).toFixed(2)
-
-  function handleConnect() {
-    wallets?.find(w => w.id === 'walletconnect')?.connect()
-      ?? wallets?.[0]?.connect()
+  function isConnectCancelledError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return /modal is closed by user|cancelled|canceled|rejected|proposal expired|session expired/i.test(message.toLowerCase())
   }
+
+  async function tryConnect(walletId: string): Promise<'connected' | 'cancelled' | 'failed'> {
+    const wallet = wallets?.find(w => w.id === walletId)
+    if (!wallet) return 'failed'
+
+    try {
+      await wallet.connect()
+      return 'connected'
+    } catch (error) {
+      if (isConnectCancelledError(error)) {
+        return 'cancelled'
+      }
+
+      console.error(`Failed to connect with ${walletId}:`, error)
+      return 'failed'
+    }
+  }
+
+  async function handleConnect() {
+    const preferredOrder =
+      connectMode === 'walletconnect-first'
+        ? ['walletconnect', 'pera', 'defly']
+        : ['pera', 'defly', 'walletconnect']
+
+    for (const walletId of preferredOrder) {
+      const result = await tryConnect(walletId)
+      if (result === 'connected') {
+        return
+      }
+      if (result === 'cancelled') {
+        return
+      }
+    }
+
+    const fallback = wallets?.[0]
+    if (!fallback) return
+    await tryConnect(fallback.id)
+  }
+
+  const showConnectedWallet = isHydrated && !!activeAccount
 
   async function handleBuyPolicy() {
     if (!activeAccount) return
+    if (productId !== 'flight') {
+      setErrorMsg('Only Flight Delay is wired on-chain in this MVP. Weather and Cargo are demo previews.')
+      setStep('error')
+      return
+    }
     setStep('signing')
     setErrorMsg('')
 
@@ -94,18 +305,52 @@ export default function AppPage() {
       const sp = await algodClient.getTransactionParams().do()
       const premiumMicroAlgo = Math.round(premium * 1_000_000)
       const appAddress = algosdk.getApplicationAddress(APP_ID)
+      const summary = buildSummary(productId, coverage, premium, {
+        flightNumber,
+        delayThreshold,
+        region,
+        cropType,
+        routeFrom,
+        routeTo,
+        cargoValue,
+      })
 
       const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: activeAccount.address,
         receiver: APP_ID > 0 ? appAddress : activeAccount.address,
         amount: premiumMicroAlgo,
         suggestedParams: sp,
-        note: new TextEncoder().encode(`AeroShield:${flightNumber}`),
+        note: new TextEncoder().encode(`AeroShield:${productId}:${flightNumber || routeFrom}`),
       })
 
-      const encoded = [payTxn.toByte()]
+      const buyPolicyMethod = algosdk.ABIMethod.fromSignature('buyPolicy(pay,string,uint64,uint64)void')
+      const composer = new algosdk.AtomicTransactionComposer()
+      const emptySigner = algosdk.makeEmptyTransactionSigner()
+
+      composer.addMethodCall({
+        appID: APP_ID,
+        method: buyPolicyMethod,
+        sender: activeAccount.address,
+        methodArgs: [
+          { txn: payTxn, signer: emptySigner },
+          flightNumber,
+          BigInt(coverage * 1_000_000),
+          BigInt(delayThreshold),
+        ],
+        suggestedParams: {
+          ...sp,
+          fee: 2_000,
+          flatFee: true,
+        },
+        signer: emptySigner,
+      })
+
+      const txns = composer.buildGroup().map(t => t.txn)
+      const encoded = txns.map(txn => txn.toByte())
       const signed = await signTransactions(encoded)
-      const { txid: id } = await algodClient.sendRawTransaction(signed as Uint8Array[]).do()
+      await algodClient.sendRawTransaction(signed as Uint8Array[]).do()
+      const paymentTxId = txns.find(txn => txn.type === 'pay')?.txID() ?? txns[0].txID()
+      const appCallTxId = txns.find(txn => txn.type === 'appl')?.txID() ?? txns[txns.length - 1].txID()
 
       // Wait a moment for transaction to settle and capture balance after
       await new Promise(r => setTimeout(r, 2000))
@@ -113,15 +358,44 @@ export default function AppPage() {
       const balanceAfter = Number(accountInfoAfter.amount) / 1_000_000
 
       const newPolicy: Policy = {
+        productId,
+        productLabel: selectedProduct.title,
         flightNumber,
+        delayThreshold,
+        region,
+        cropType,
+        routeFrom,
+        routeTo,
+        cargoValue: Number(cargoValue),
         coverage,
         premium,
         walletAddress: activeAccount.address,
-        txId: id,
+        summary,
+        triggerDescription: selectedProduct.summaryLine,
+        appId: APP_ID,
+        txId: paymentTxId,
+        appCallTxId,
         balanceBeforePurchase: balanceBefore,
         balanceAfterPurchase: balanceAfter,
       }
-      setPolicy(newPolicy)
+      const storedPolicy = await policyRepository.create({
+        walletAddress: activeAccount.address,
+        productId,
+        productLabel: selectedProduct.title,
+        flightNumber,
+        routeFrom,
+        routeTo,
+        region,
+        cropType,
+        delayThreshold,
+        coverage,
+        premium,
+        appId: APP_ID,
+        premiumPaymentTxId: paymentTxId,
+        appCallTxId,
+      })
+
+      setPolicy({ ...newPolicy, policyRecordId: storedPolicy.id })
       setWalletBalance(balanceAfter)
       setStep('monitoring')
     } catch (e: any) {
@@ -135,11 +409,38 @@ export default function AppPage() {
     setStep('checking')
 
     try {
+      if (policy.productId !== 'flight') {
+        const demoDelay = mockDelay ? 150 : 0
+        setPolicy(prev => ({ ...prev!, delayMinutes: demoDelay }))
+
+        if (policy.policyRecordId) {
+          await policyRepository.update(policy.policyRecordId, {
+            delayMinutes: demoDelay,
+            lastOracleCheckAt: new Date().toISOString(),
+          })
+        }
+
+        if (mockDelay) {
+          setStep('paying')
+          await triggerPayout(demoDelay)
+        } else {
+          setStep('monitoring')
+        }
+        return
+      }
+
       const url = `/api/oracle?flight=${policy.flightNumber}${mockDelay ? '&mock=true' : ''}`
       const res = await fetch(url)
       const data = await res.json()
 
       setPolicy(prev => ({ ...prev!, delayMinutes: data.delayMinutes }))
+
+      if (policy.policyRecordId) {
+        await policyRepository.update(policy.policyRecordId, {
+          delayMinutes: data.delayMinutes,
+          lastOracleCheckAt: new Date().toISOString(),
+        })
+      }
 
       if (data.isEligible) {
         setStep('paying')
@@ -163,7 +464,7 @@ export default function AppPage() {
         body: JSON.stringify({
           beneficiary: policy.walletAddress,
           coverageAmountAlgo: policy.coverage,
-          flightNumber: policy.flightNumber,
+          flightNumber: policy.productId === 'flight' ? policy.flightNumber : `${policy.productLabel}:${policy.routeFrom ?? 'N/A'}`,
           appId: APP_ID,
         }),
       })
@@ -185,6 +486,16 @@ export default function AppPage() {
         delayMinutes,
         balanceAfterPayout: balanceAfter
       }))
+
+      if (policy.policyRecordId) {
+        await policyRepository.update(policy.policyRecordId, {
+          payoutTxId: data.txId,
+          delayMinutes,
+          payoutTriggeredAt: new Date().toISOString(),
+          lastOracleCheckAt: new Date().toISOString(),
+        })
+      }
+
       setWalletBalance(balanceAfter)
       setStep('done')
     } catch (e: any) {
@@ -212,7 +523,7 @@ export default function AppPage() {
             Get covered in{' '}
             <span className="text-gradient">60 seconds.</span>
           </h1>
-          <p className="text-zinc-400 max-w-lg mx-auto">
+          <p className="text-slate-700 max-w-lg mx-auto">
             Connect your wallet, pick a flight, choose your coverage. That's it.
           </p>
         </motion.div>
@@ -233,10 +544,10 @@ export default function AppPage() {
                   className="glass rounded-2xl p-6 space-y-6"
                 >
                   {/* Wallet connect */}
-                  {!activeAccount ? (
+                  {!showConnectedWallet ? (
                     <div className="border border-cyan-400/20 bg-cyan-400/5 rounded-xl p-5 text-center">
                       <Wallet className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-                      <p className="text-sm text-zinc-300 mb-4">Connect your Algorand wallet to continue</p>
+                      <p className="text-sm text-slate-700 mb-4">Connect your Algorand wallet to continue</p>
                       <Button
                         onClick={handleConnect}
                         className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold gap-2"
@@ -250,11 +561,11 @@ export default function AppPage() {
                       <div className="flex items-center gap-2 p-3 bg-emerald-400/5 border border-emerald-400/20 rounded-xl">
                         <div className="status-dot" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-zinc-500">Connected wallet</p>
-                          <p className="text-sm font-mono text-zinc-300 truncate">{activeAccount.address}</p>
+                          <p className="text-xs text-slate-600">Connected wallet</p>
+                          <p className="text-sm font-mono text-slate-800 truncate">{activeAccount.address}</p>
                         </div>
                       </div>
-                      {walletBalance !== null && (
+                      {showConnectedWallet && walletBalance !== null && (
                         <motion.div
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -262,37 +573,182 @@ export default function AppPage() {
                         >
                           <Wallet className="w-5 h-5 text-cyan-400 flex-shrink-0" />
                           <div className="flex-1">
-                            <p className="text-xs text-zinc-500">Wallet Balance</p>
-                            <p className="text-lg font-bold text-white">{walletBalance.toFixed(2)} ALGO</p>
+                            <p className="text-xs text-slate-600">Wallet Balance</p>
+                            <p className="text-lg font-bold text-slate-900">{walletBalance.toFixed(2)} ALGO</p>
                           </div>
                         </motion.div>
                       )}
                     </div>
                   )}
 
+                  {/* Insurance type selector */}
+                  <div className="space-y-2">
+                    <Label className="text-slate-900 text-sm font-medium">Insurance type</Label>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {INSURANCE_PRODUCTS.map(product => {
+                        const isActive = product.id === productId
+                        return (
+                          <button
+                            key={product.id}
+                            onClick={() => setProductId(product.id)}
+                            type="button"
+                            className={`rounded-xl border p-3 text-left transition-all ${
+                              isActive
+                                ? 'border-cyan-400/50 bg-cyan-400/10 shadow-[0_0_0_1px_rgba(34,211,238,0.12)]'
+                                : 'border-white/10 bg-white/5 hover:bg-white/10'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-slate-900">{product.title}</p>
+                                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">{product.subtitle}</p>
+                                {!product.isOnChainReady && (
+                                  <p className="text-[10px] mt-1 font-semibold text-violet-600 uppercase tracking-wider">Demo preview</p>
+                                )}
+                              </div>
+                              <div
+                                className={`w-2.5 h-2.5 rounded-full ${
+                                  product.accent === 'cyan'
+                                    ? 'bg-cyan-400'
+                                    : product.accent === 'emerald'
+                                      ? 'bg-emerald-400'
+                                      : 'bg-violet-400'
+                                }`}
+                              />
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
                   <Separator className="bg-white/5" />
 
-                  {/* Flight number */}
-                  <div className="space-y-2">
-                    <Label className="text-white text-sm font-medium">Flight number</Label>
-                    <div className="relative">
-                      <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                      <Input
-                        value={flightNumber}
-                        onChange={e => setFlightNumber(e.target.value.toUpperCase())}
-                        placeholder="e.g. AI302, 6E204"
-                        className="pl-10 bg-white/8 border-white/15 focus:border-cyan-400/60 text-white font-mono placeholder:text-zinc-300"
-                        disabled={!activeAccount}
-                      />
+                  {/* Product-specific form */}
+                  {productId === 'flight' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 text-sm font-medium">Flight number</Label>
+                        <div className="relative">
+                          <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                          <Input
+                            value={flightNumber}
+                            onChange={e => setFlightNumber(e.target.value.toUpperCase())}
+                            placeholder="e.g. AI302, 6E204"
+                            className="pl-10 bg-white/8 border-white/15 focus:border-cyan-400/60 text-slate-900 font-mono placeholder:text-slate-500"
+                            disabled={!activeAccount}
+                          />
+                        </div>
+                        <p className="text-xs text-slate-600">Enter the IATA flight code (airline code + flight number)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 text-sm font-medium">Delay threshold</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {([90, 120, 180] as FlightDelayThreshold[]).map(threshold => (
+                            <button
+                              key={threshold}
+                              type="button"
+                              onClick={() => setDelayThreshold(threshold)}
+                              disabled={!activeAccount}
+                              className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                                delayThreshold === threshold
+                                  ? 'bg-cyan-400 text-black glow-cyan'
+                                  : 'glass glass-hover text-slate-700 hover:text-slate-900'
+                              }`}
+                            >
+                              {threshold} min
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-600">Premium scales with the delay threshold you choose</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-zinc-300">Enter the IATA flight code (airline code + flight number)</p>
-                  </div>
+                  )}
+
+                  {productId === 'weather' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 text-sm font-medium">Region</Label>
+                        <Input
+                          value={region}
+                          onChange={e => setRegion(e.target.value)}
+                          placeholder="e.g. Coastal Karnataka"
+                          className="bg-white/8 border-white/15 focus:border-emerald-400/60 text-slate-900 placeholder:text-slate-500"
+                          disabled={!activeAccount}
+                        />
+                        <p className="text-xs text-slate-600">Location-based weather risk drives the premium</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 text-sm font-medium">Crop type</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {['Rice', 'Wheat', 'Cotton'].map(item => (
+                            <button
+                              key={item}
+                              type="button"
+                              onClick={() => setCropType(item)}
+                              disabled={!activeAccount}
+                              className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                                cropType === item
+                                  ? 'bg-emerald-400 text-black glow-cyan'
+                                  : 'glass glass-hover text-slate-700 hover:text-slate-900'
+                              }`}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-600">Different crops carry different rainfall sensitivity</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {productId === 'cargo' && (
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label className="text-slate-900 text-sm font-medium">Origin</Label>
+                          <Input
+                            value={routeFrom}
+                            onChange={e => setRouteFrom(e.target.value.toUpperCase())}
+                            placeholder="BOM"
+                            className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500 font-mono"
+                            disabled={!activeAccount}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-slate-900 text-sm font-medium">Destination</Label>
+                          <Input
+                            value={routeTo}
+                            onChange={e => setRouteTo(e.target.value.toUpperCase())}
+                            placeholder="DEL"
+                            className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500 font-mono"
+                            disabled={!activeAccount}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 text-sm font-medium">Cargo value</Label>
+                        <Input
+                          type="number"
+                          value={cargoValue}
+                          onChange={e => setCargoValue(e.target.value)}
+                          placeholder="5000"
+                          className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500"
+                          disabled={!activeAccount}
+                        />
+                        <p className="text-xs text-slate-600">Higher cargo value increases the premium automatically</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Coverage selector */}
                   <div className="space-y-3">
-                    <Label className="text-white text-sm font-medium">Coverage amount</Label>
+                    <Label className="text-slate-900 text-sm font-medium">Coverage amount</Label>
                     <div className="grid grid-cols-5 gap-2">
-                      {COVERAGE_OPTIONS.map(opt => (
+                      {selectedProduct.coverageOptions.map(opt => (
                         <button
                           key={opt}
                           onClick={() => setCoverage(opt)}
@@ -300,7 +756,7 @@ export default function AppPage() {
                           className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
                             coverage === opt
                               ? 'bg-cyan-400 text-black glow-cyan'
-                              : 'glass glass-hover text-zinc-200 hover:text-white'
+                              : 'glass glass-hover text-slate-700 hover:text-slate-900'
                           }`}
                         >
                           {opt}
@@ -308,7 +764,9 @@ export default function AppPage() {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-zinc-300">Coverage in ALGO · Triggers on ≥ 2 hour delay</p>
+                    <p className="text-xs text-slate-600">
+                      {selectedProduct.summaryLine} · Premium recalculates instantly
+                    </p>
                   </div>
 
                   {/* Demo mode toggle */}
@@ -316,7 +774,7 @@ export default function AppPage() {
                     <Info className="w-4 h-4 text-amber-400 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="text-xs text-amber-300 font-medium">Demo mode</p>
-                      <p className="text-xs text-zinc-500">Simulate a delayed flight for the demo</p>
+                      <p className="text-xs text-slate-600">Simulate the payout trigger for the demo</p>
                     </div>
                     <button
                       onClick={() => setMockDelay(!mockDelay)}
@@ -330,12 +788,24 @@ export default function AppPage() {
 
                   <Button
                     onClick={() => setStep('confirm')}
-                    disabled={!activeAccount || !flightNumber}
+                    disabled={!selectedProduct.isOnChainReady || !activeAccount || !APP_ID || (productId === 'flight' && !flightNumber) || (productId === 'weather' && !region) || (productId === 'cargo' && (!routeFrom || !routeTo || !cargoValue))}
                     className="w-full bg-cyan-400 hover:bg-cyan-300 text-black font-bold gap-2 py-5"
                   >
                     Review Policy
                     <ArrowRight className="w-4 h-4" />
                   </Button>
+
+                  {!selectedProduct.isOnChainReady && (
+                    <p className="text-xs text-slate-600 text-center">
+                      {selectedProduct.title} is a demo preview in this MVP. On-chain purchase is enabled for Flight Delay.
+                    </p>
+                  )}
+
+                  {!!activeAccount && !APP_ID && (
+                    <p className="text-xs text-amber-600 text-center">
+                      NEXT_PUBLIC_APP_ID is not set. Deploy contract first and add App ID to continue.
+                    </p>
+                  )}
                 </motion.div>
               )}
 
@@ -349,30 +819,32 @@ export default function AppPage() {
                   className="glass rounded-2xl p-6 space-y-5"
                 >
                   <h3 className="font-bold text-lg" style={{ fontFamily: 'Syne, sans-serif' }}>Review your policy</h3>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">{selectedProduct.title}</p>
                   <div className="space-y-3">
-                    {[
-                      { label: 'Flight', value: flightNumber, mono: true },
-                      { label: 'Coverage', value: `${coverage} ALGO` },
-                      { label: 'Premium (5%)', value: `${premium} ALGO` },
-                      { label: 'Trigger threshold', value: '≥ 120 minute delay' },
-                      { label: 'Payout method', value: 'Atomic inner transaction' },
-                      { label: 'Network', value: 'Algorand TestNet' },
-                    ].map(item => (
+                    {buildSummary(productId, coverage, premium, {
+                      flightNumber,
+                      delayThreshold,
+                      region,
+                      cropType,
+                      routeFrom,
+                      routeTo,
+                      cargoValue,
+                    }).map(item => (
                       <div key={item.label} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-                        <span className="text-sm text-zinc-500">{item.label}</span>
-                        <span className={`text-sm font-medium text-white ${item.mono ? 'font-mono' : ''}`}>{item.value}</span>
+                        <span className="text-sm text-slate-600">{item.label}</span>
+                        <span className={`text-sm font-medium text-slate-900 ${item.mono ? 'font-mono' : ''}`}>{item.value}</span>
                       </div>
                     ))}
                   </div>
 
                   <div className="bg-cyan-400/5 border border-cyan-400/15 rounded-xl p-4">
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      By purchasing this policy, you authorize a smart contract on Algorand TestNet to hold your premium and automatically pay out {coverage} ALGO to your wallet if flight {flightNumber} is delayed by 2+ hours.
+                    <p className="text-xs text-slate-700 leading-relaxed">
+                      By purchasing this {selectedProduct.title.toLowerCase()} policy, you authorize a smart contract on Algorand TestNet to hold your premium and automatically settle {coverage} ALGO to your wallet when the trigger condition is met.
                     </p>
                   </div>
 
                   <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setStep('form')} className="flex-1 border-white/10 text-zinc-400">
+                    <Button variant="outline" onClick={() => setStep('form')} className="flex-1 border-white/10 text-slate-700">
                       Back
                     </Button>
                     <Button
@@ -398,7 +870,7 @@ export default function AppPage() {
                     <Loader2 className="w-7 h-7 text-cyan-400 animate-spin" />
                   </div>
                   <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Waiting for signature</h3>
-                  <p className="text-zinc-400 text-sm">Approve the transaction in your wallet</p>
+                  <p className="text-slate-700 text-sm">Approve the transaction in your wallet</p>
                 </motion.div>
               )}
 
@@ -416,7 +888,7 @@ export default function AppPage() {
                     </div>
                     <div>
                       <h3 className="font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Policy active</h3>
-                      <p className="text-xs text-zinc-500">Monitoring flight {policy.flightNumber}</p>
+                      <p className="text-xs text-slate-600">Monitoring {policy.productLabel}</p>
                     </div>
                     <div className="ml-auto flex items-center gap-1.5">
                       <div className="status-dot" />
@@ -426,12 +898,12 @@ export default function AppPage() {
 
                   {/* Transaction summary */}
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
-                    <p className="text-xs text-zinc-500 uppercase tracking-widest">Purchase confirmed</p>
+                    <p className="text-xs text-slate-600 uppercase tracking-widest">{policy.productLabel} purchase confirmed</p>
                     {policy.balanceBeforePurchase !== undefined && policy.balanceAfterPurchase !== undefined && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-zinc-400">Before purchase</span>
-                          <span className="font-mono text-sm text-zinc-300">{policy.balanceBeforePurchase.toFixed(2)} ALGO</span>
+                          <span className="text-sm text-slate-600">Before purchase</span>
+                          <span className="font-mono text-sm text-slate-800">{policy.balanceBeforePurchase.toFixed(2)} ALGO</span>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-2 bg-red-400/5 border border-red-400/20 rounded-lg">
                           <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />
@@ -439,8 +911,8 @@ export default function AppPage() {
                           <span className="ml-auto font-bold text-red-400">-{policy.premium} ALGO</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-zinc-400">After purchase</span>
-                          <span className="font-mono text-sm text-zinc-300">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
+                          <span className="text-sm text-slate-600">After purchase</span>
+                          <span className="font-mono text-sm text-slate-800">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
                         </div>
                       </div>
                     )}
@@ -451,19 +923,33 @@ export default function AppPage() {
                       href={`https://testnet.explorer.perawallet.app/tx/${policy.txId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-xs text-zinc-500 hover:text-cyan-400 transition-colors"
+                      className="flex items-center gap-2 text-xs text-slate-600 hover:text-cyan-400 transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span className="font-mono truncate">{policy.txId}</span>
+                      <span className="font-mono truncate">Premium payment tx: {policy.txId}</span>
                     </a>
                   )}
 
+                  {policy.appCallTxId && (
+                    <a
+                      href={`https://testnet.explorer.perawallet.app/tx/${policy.appCallTxId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-xs text-slate-600 hover:text-cyan-400 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span className="font-mono truncate">Buy policy app call tx: {policy.appCallTxId}</span>
+                    </a>
+                  )}
+
+                  <p className="text-xs text-slate-600">App ID: <span className="font-mono">{policy.appId}</span></p>
+
                   {policy.delayMinutes !== undefined && (
                     <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-4">
-                      <p className="text-sm text-zinc-300">
-                        Current delay: <span className="text-amber-400 font-bold">{policy.delayMinutes} minutes</span>
-                        {policy.delayMinutes < 120 && (
-                          <span className="text-zinc-500 ml-2">(threshold: 120 min)</span>
+                      <p className="text-sm text-slate-700">
+                        Trigger result: <span className="text-amber-400 font-bold">{policy.delayMinutes} minutes</span>
+                        {policy.productId === 'flight' && policy.delayMinutes < (policy.delayThreshold ?? 120) && (
+                          <span className="text-slate-500 ml-2">(threshold: {policy.delayThreshold ?? 120} min)</span>
                         )}
                       </p>
                     </div>
@@ -474,7 +960,7 @@ export default function AppPage() {
                     className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white gap-2"
                   >
                     <Activity className="w-4 h-4" />
-                    Check flight status now
+                    Check trigger status now
                   </Button>
                 </motion.div>
               )}
@@ -491,7 +977,7 @@ export default function AppPage() {
                     <Loader2 className="w-7 h-7 text-violet-400 animate-spin" />
                   </div>
                   <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Oracle querying</h3>
-                  <p className="text-zinc-400 text-sm">Fetching real-time flight data from AviationStack...</p>
+                  <p className="text-slate-700 text-sm">Fetching real-time flight data from AviationStack...</p>
                 </motion.div>
               )}
 
@@ -507,7 +993,7 @@ export default function AppPage() {
                     <Zap className="w-7 h-7 text-amber-400 animate-pulse" />
                   </div>
                   <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Delay confirmed!</h3>
-                  <p className="text-zinc-400 text-sm">Submitting atomic payout transaction to Algorand...</p>
+                  <p className="text-slate-700 text-sm">Submitting atomic payout transaction to Algorand...</p>
                 </motion.div>
               )}
 
@@ -533,20 +1019,20 @@ export default function AppPage() {
                     
                     <div>
                       <h3 className="text-2xl font-bold mb-2 text-emerald-400" style={{ fontFamily: 'Syne, sans-serif' }}>Payout sent!</h3>
-                      <p className="text-zinc-300 mb-1">{policy.coverage} ALGO</p>
-                      <p className="text-zinc-500 text-sm mb-2">
-                        {policy.delayMinutes} minute delay confirmed · Paid automatically by smart contract
+                      <p className="text-slate-700 mb-1">{policy.productLabel} · {policy.coverage} ALGO</p>
+                      <p className="text-slate-600 text-sm mb-2">
+                        {policy.delayMinutes} minute trigger confirmed · Paid automatically by smart contract
                       </p>
                     </div>
 
                     {/* Payout fund movement */}
                     {policy.balanceAfterPurchase !== undefined && policy.balanceAfterPayout !== undefined && (
                       <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2 text-left">
-                        <p className="text-xs text-zinc-500 uppercase tracking-widest">Payout settlement</p>
+                        <p className="text-xs text-slate-600 uppercase tracking-widest">Payout settlement</p>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-zinc-400">Before payout</span>
-                            <span className="font-mono text-sm text-zinc-300">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
+                            <span className="text-sm text-slate-600">Before payout</span>
+                            <span className="font-mono text-sm text-slate-800">{policy.balanceAfterPurchase.toFixed(2)} ALGO</span>
                           </div>
                           <div className="flex items-center gap-2 px-3 py-2 bg-emerald-400/5 border border-emerald-400/20 rounded-lg">
                             <TrendingUp className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -554,8 +1040,8 @@ export default function AppPage() {
                             <span className="ml-auto font-bold text-emerald-400">+{policy.coverage} ALGO</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-zinc-400">After payout</span>
-                            <span className="font-mono text-sm text-white font-bold">{policy.balanceAfterPayout.toFixed(2)} ALGO</span>
+                            <span className="text-sm text-slate-600">After payout</span>
+                            <span className="font-mono text-sm text-slate-900 font-bold">{policy.balanceAfterPayout.toFixed(2)} ALGO</span>
                           </div>
                         </div>
                       </div>
@@ -612,7 +1098,7 @@ export default function AppPage() {
               transition={{ delay: 0.2 }}
               className="glass rounded-2xl p-5"
             >
-              <p className="text-xs uppercase tracking-widest text-zinc-600 mb-4">Policy Summary</p>
+              <p className="text-xs uppercase tracking-widest text-slate-700 font-semibold mb-4">Policy Summary</p>
               <div className="space-y-3">
                 {[
                   { label: 'Coverage', value: `${coverage} ALGO` },
@@ -622,14 +1108,14 @@ export default function AppPage() {
                   { label: 'Payout ratio', value: `${(coverage / premium).toFixed(0)}×` },
                 ].map(item => (
                   <div key={item.label} className="flex justify-between text-sm">
-                    <span className="text-zinc-500">{item.label}</span>
-                    <span className="text-white font-medium">{item.value}</span>
+                    <span className="text-slate-600">{item.label}</span>
+                    <span className="text-slate-900 font-semibold">{item.value}</span>
                   </div>
                 ))}
               </div>
               <Separator className="bg-white/5 my-4" />
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">You pay today</span>
+                <span className="text-slate-700 font-medium">You pay today</span>
                 <span className="text-cyan-400 font-bold text-lg">{premium} ALGO</span>
               </div>
             </motion.div>
@@ -641,7 +1127,7 @@ export default function AppPage() {
               transition={{ delay: 0.3 }}
               className="glass rounded-2xl p-5 space-y-3"
             >
-              <p className="text-xs uppercase tracking-widest text-zinc-600">How payout works</p>
+              <p className="text-xs uppercase tracking-widest text-slate-700 font-semibold">How payout works</p>
               {[
                 { step: '1', text: 'Oracle detects delay ≥ 2h' },
                 { step: '2', text: 'Smart contract auto-triggers' },
@@ -651,7 +1137,7 @@ export default function AppPage() {
                   <div className="w-6 h-6 rounded-full bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center flex-shrink-0">
                     <span className="text-[10px] text-cyan-400 font-bold">{item.step}</span>
                   </div>
-                  <span className="text-zinc-400">{item.text}</span>
+                  <span className="text-slate-700">{item.text}</span>
                 </div>
               ))}
             </motion.div>
@@ -667,7 +1153,7 @@ export default function AppPage() {
                 <Shield className="w-4 h-4 text-emerald-400" />
                 <p className="text-xs text-emerald-400 font-medium uppercase tracking-wider">Non-custodial</p>
               </div>
-              <p className="text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 Your funds are locked in a verified smart contract. No human can intervene, delay, or deny your payout.
               </p>
             </motion.div>

@@ -1,14 +1,22 @@
 'use client'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useWallet } from '@txnlab/use-wallet-react'
 import {
-  Shield, TrendingUp, Clock, CheckCircle2,
-  Plane, ExternalLink, AlertCircle, Zap, BarChart3,
+  Shield, TrendingUp, Clock,
+  Plane, ExternalLink, Zap, BarChart3,
   ArrowUpRight, Calendar, Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
+import {
+  computePolicyStatus,
+  getPolicyStorageKey,
+  getPolicyStorageUpdatedEventName,
+  policyRepository,
+  type PolicyRecord,
+} from '@/lib/policies'
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -16,71 +24,275 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as any },
 })
 
-/* ── Static mock data (shows the product vision) ── */
-const mockPolicies = [
+type DashboardStatus = 'active' | 'paid'
+
+type DashboardActivity = {
+  type: 'payout' | 'policy' | 'oracle'
+  text: string
+  subtext: string
+  time: string
+  color: 'emerald' | 'cyan' | 'violet'
+}
+
+const DEMO_POLICIES: PolicyRecord[] = [
   {
-    id: 'AS-48291',
-    flight: 'AI302',
-    route: 'BOM → DEL',
-    date: 'Apr 15, 2026',
+    id: 'demo_policy_active',
+    walletAddress: 'DEMO',
+    productId: 'flight',
+    productLabel: 'Flight Delay',
+    flightNumber: 'AI302',
+    routeFrom: 'BOM',
+    routeTo: 'DEL',
+    delayThreshold: 120,
     coverage: 10,
     premium: 0.5,
-    status: 'active',
-    delayMinutes: null,
+    appId: Number(process.env.NEXT_PUBLIC_APP_ID ?? 0),
+    premiumPaymentTxId: 'DEMO_PREMIUM_TX',
+    appCallTxId: 'DEMO_BUY_TX',
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    lastOracleCheckAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    delayMinutes: 75,
   },
   {
-    id: 'AS-48103',
-    flight: '6E204',
-    route: 'DEL → BLR',
-    date: 'Apr 10, 2026',
+    id: 'demo_policy_paid',
+    walletAddress: 'DEMO',
+    productId: 'flight',
+    productLabel: 'Flight Delay',
+    flightNumber: '6E204',
+    routeFrom: 'DEL',
+    routeTo: 'BLR',
+    delayThreshold: 120,
     coverage: 25,
     premium: 1.25,
-    status: 'paid',
+    appId: Number(process.env.NEXT_PUBLIC_APP_ID ?? 0),
+    premiumPaymentTxId: 'DEMO_PREMIUM_TX_2',
+    appCallTxId: 'DEMO_BUY_TX_2',
+    payoutTxId: 'DEMO_PAYOUT_TX',
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    payoutTriggeredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    lastOracleCheckAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     delayMinutes: 145,
   },
-  {
-    id: 'AS-47891',
-    flight: 'UK812',
-    route: 'BLR → HYD',
-    date: 'Apr 3, 2026',
-    coverage: 5,
-    premium: 0.25,
-    status: 'expired',
-    delayMinutes: 40,
-  },
 ]
 
-const mockActivity = [
-  { type: 'payout',   text: 'Received 25 ALGO payout',   subtext: 'Flight 6E204 · 145 min delay',  time: '4 days ago',  color: 'emerald' },
-  { type: 'policy',   text: 'Policy AI302 activated',     subtext: 'Coverage: 10 ALGO',             time: '1 day ago',   color: 'cyan'    },
-  { type: 'oracle',   text: 'Oracle check completed',     subtext: 'No delay detected · UK812',     time: '11 days ago', color: 'violet'  },
-  { type: 'expired',  text: 'Policy UK812 expired',       subtext: 'Flight landed on time',         time: '11 days ago', color: 'zinc'    },
-]
+function formatAgo(isoDate: string) {
+  const ms = Date.now() - new Date(isoDate).getTime()
+  const minutes = Math.max(1, Math.floor(ms / 60000))
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
 
-const statsData = [
-  { label: 'Total Coverage',  value: '40 ALGO',  sub: 'Across 3 policies',     icon: Shield,     color: 'cyan'    },
-  { label: 'Total Payouts',   value: '25 ALGO',  sub: '1 claim triggered',      icon: Zap,        color: 'emerald' },
-  { label: 'Total Premiums',  value: '2 ALGO',   sub: 'Paid this month',        icon: TrendingUp, color: 'violet'  },
-  { label: 'Avg Settlement',  value: '2.3s',     sub: 'vs 3-6 weeks traditional', icon: Clock,   color: 'amber'   },
-]
+function formatDateLabel(isoDate: string) {
+  return new Date(isoDate).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
 
-function StatusBadge({ status }: { status: string }) {
+function getPolicyRoute(policy: PolicyRecord) {
+  if (policy.routeFrom && policy.routeTo) {
+    return `${policy.routeFrom} → ${policy.routeTo}`
+  }
+
+  if (policy.productId === 'flight') {
+    return 'Flight coverage'
+  }
+
+  if (policy.region) {
+    return policy.region
+  }
+
+  return policy.productLabel
+}
+
+function getExplorerTx(policy: PolicyRecord) {
+  return policy.payoutTxId ?? policy.appCallTxId ?? policy.premiumPaymentTxId
+}
+
+function buildActivityItems(policies: PolicyRecord[]): DashboardActivity[] {
+  const rows: DashboardActivity[] = []
+
+  for (const policy of policies) {
+    const status = computePolicyStatus(policy)
+    if (status === 'paid' && policy.payoutTxId) {
+      rows.push({
+        type: 'payout',
+        text: `Received ${policy.coverage} ALGO payout`,
+        subtext: `${policy.productLabel} · ${policy.delayMinutes ?? 0} min trigger`,
+        time: formatAgo(policy.payoutTriggeredAt ?? policy.updatedAt),
+        color: 'emerald',
+      })
+    }
+
+    rows.push({
+      type: 'policy',
+      text: `${policy.productLabel} policy activated`,
+      subtext: `Coverage: ${policy.coverage} ALGO`,
+      time: formatAgo(policy.createdAt),
+      color: 'cyan',
+    })
+
+    if (policy.lastOracleCheckAt) {
+      rows.push({
+        type: 'oracle',
+        text: 'Oracle check completed',
+        subtext: `${policy.flightNumber} · ${policy.delayMinutes ?? 0} min`,
+        time: formatAgo(policy.lastOracleCheckAt),
+        color: 'violet',
+      })
+    }
+  }
+
+  return rows.slice(0, 8)
+}
+
+function StatusBadge({ status }: { status: DashboardStatus }) {
   if (status === 'active') return (
     <div className="flex items-center gap-1.5">
       <div className="status-dot w-1.5 h-1.5" />
       <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs">Active</Badge>
     </div>
   )
-  if (status === 'paid') return (
-    <Badge className="bg-cyan-400/10 text-cyan-400 border-cyan-400/20 text-xs">Paid Out</Badge>
-  )
+
   return (
-    <Badge className="bg-zinc-800 text-zinc-500 border-zinc-700 text-xs">Expired</Badge>
+    <Badge className="bg-cyan-400/10 text-cyan-400 border-cyan-400/20 text-xs">Paid Out</Badge>
   )
 }
 
 export default function DashboardPage() {
   const { activeAccount, wallets } = useWallet()
+  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? 'pera-first'
+  const [policies, setPolicies] = useState<PolicyRecord[]>([])
+  const [isLoadingPolicies, setIsLoadingPolicies] = useState(false)
+
+  function isConnectCancelledError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return /modal is closed by user|cancelled|canceled|rejected|proposal expired|session expired/i.test(message.toLowerCase())
+  }
+
+  async function tryConnect(walletId: string): Promise<'connected' | 'cancelled' | 'failed'> {
+    const wallet = wallets?.find(w => w.id === walletId)
+    if (!wallet) return 'failed'
+
+    try {
+      await wallet.connect()
+      return 'connected'
+    } catch (error) {
+      if (isConnectCancelledError(error)) {
+        return 'cancelled'
+      }
+
+      console.error(`Failed to connect with ${walletId}:`, error)
+      return 'failed'
+    }
+  }
+
+  async function handleConnect() {
+    const preferredOrder =
+      connectMode === 'walletconnect-first'
+        ? ['walletconnect', 'pera', 'defly']
+        : ['pera', 'defly', 'walletconnect']
+
+    for (const walletId of preferredOrder) {
+      const result = await tryConnect(walletId)
+      if (result === 'connected') {
+        return
+      }
+      if (result === 'cancelled') {
+        return
+      }
+    }
+
+    const fallback = wallets?.[0]
+    if (!fallback) return
+    await tryConnect(fallback.id)
+  }
+
+  useEffect(() => {
+    if (!activeAccount) {
+      setPolicies([])
+      return
+    }
+
+    let isCancelled = false
+
+    const loadPolicies = async () => {
+      setIsLoadingPolicies(true)
+      const records = await policyRepository.listByWallet(activeAccount.address)
+      if (!isCancelled) {
+        setPolicies(records)
+        setIsLoadingPolicies(false)
+      }
+    }
+
+    loadPolicies()
+
+    const refreshOnStorage = (event: StorageEvent) => {
+      if (event.key === getPolicyStorageKey()) {
+        void loadPolicies()
+      }
+    }
+
+    const refreshOnSameTabWrite = () => {
+      void loadPolicies()
+    }
+
+    window.addEventListener('storage', refreshOnStorage)
+    window.addEventListener(getPolicyStorageUpdatedEventName(), refreshOnSameTabWrite)
+
+    return () => {
+      isCancelled = true
+      window.removeEventListener('storage', refreshOnStorage)
+      window.removeEventListener(getPolicyStorageUpdatedEventName(), refreshOnSameTabWrite)
+    }
+  }, [activeAccount])
+
+  const isUsingDemoData = !isLoadingPolicies && policies.length === 0
+  const displayedPolicies = isUsingDemoData ? DEMO_POLICIES : policies
+
+  const totalCoverage = useMemo(() => displayedPolicies.reduce((sum, policy) => sum + policy.coverage, 0), [displayedPolicies])
+  const totalPayouts = useMemo(
+    () => displayedPolicies.filter(policy => computePolicyStatus(policy) === 'paid').reduce((sum, policy) => sum + policy.coverage, 0),
+    [displayedPolicies]
+  )
+  const totalPremiums = useMemo(() => displayedPolicies.reduce((sum, policy) => sum + policy.premium, 0), [displayedPolicies])
+  const paidPolicies = useMemo(() => displayedPolicies.filter(policy => computePolicyStatus(policy) === 'paid'), [displayedPolicies])
+  const avgSettlement = useMemo(() => {
+    if (!paidPolicies.length) return '--'
+
+    const durations = paidPolicies
+      .map(policy => {
+        if (!policy.payoutTriggeredAt) return null
+        const start = new Date(policy.createdAt).getTime()
+        const end = new Date(policy.payoutTriggeredAt).getTime()
+        const seconds = (end - start) / 1000
+        return Number.isFinite(seconds) && seconds > 0 ? seconds : null
+      })
+      .filter((value): value is number => value !== null)
+
+    if (!durations.length) return '--'
+
+    const average = durations.reduce((sum, value) => sum + value, 0) / durations.length
+    return `${average.toFixed(1)}s`
+  }, [paidPolicies])
+
+  const statsData = useMemo(
+    () => [
+      { label: 'Total Coverage', value: `${totalCoverage} ALGO`, sub: `Across ${displayedPolicies.length} policies`, icon: Shield, color: 'cyan' as const },
+      { label: 'Total Payouts', value: `${totalPayouts} ALGO`, sub: `${paidPolicies.length} claim${paidPolicies.length === 1 ? '' : 's'} triggered`, icon: Zap, color: 'emerald' as const },
+      { label: 'Total Premiums', value: `${totalPremiums.toFixed(2)} ALGO`, sub: 'Paid from wallet on buy', icon: TrendingUp, color: 'violet' as const },
+      { label: 'Avg Settlement', value: avgSettlement, sub: 'Measured from buy to payout tx', icon: Clock, color: 'amber' as const },
+    ],
+    [avgSettlement, displayedPolicies.length, paidPolicies.length, totalCoverage, totalPayouts, totalPremiums]
+  )
+
+  const activityItems = useMemo(() => buildActivityItems(displayedPolicies), [displayedPolicies])
 
   if (!activeAccount) {
     return (
@@ -92,7 +304,7 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Syne, sans-serif' }}>Connect to view dashboard</h2>
           <p className="text-zinc-400 text-sm mb-6">Your policies, payouts, and activity — all on-chain.</p>
           <Button
-            onClick={() => wallets?.find(w => w.id === 'walletconnect')?.connect() ?? wallets?.[0]?.connect()}
+            onClick={handleConnect}
             className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold gap-2"
           >
             <Zap className="w-4 h-4" />
@@ -140,7 +352,7 @@ export default function DashboardPage() {
                   'text-amber-400'
                 }`} />
               </div>
-              <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
+              <p className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
               <p className="text-xs text-zinc-300 mt-0.5 font-medium">{stat.label}</p>
               <p className="text-xs text-zinc-400 mt-1">{stat.sub}</p>
             </motion.div>
@@ -154,10 +366,25 @@ export default function DashboardPage() {
             <motion.div {...fadeUp(0.2)} className="glass rounded-2xl overflow-hidden">
               <div className="flex items-center justify-between p-5 border-b border-white/5">
                 <h2 className="font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Your policies</h2>
-                <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 text-xs font-medium">{mockPolicies.length} total</Badge>
+                <div className="flex items-center gap-2">
+                  {isUsingDemoData && (
+                    <Badge className="bg-violet-400/10 text-violet-400 border-violet-400/20 text-xs">Demo data</Badge>
+                  )}
+                  <Badge className="bg-zinc-800 text-zinc-300 border-zinc-700 text-xs font-medium">{displayedPolicies.length} total</Badge>
+                </div>
               </div>
+              {!displayedPolicies.length && (
+                <div className="p-6 text-sm text-zinc-400">
+                  {isLoadingPolicies ? 'Loading policies...' : 'No policies found yet. Buy one from the app page to see live status here.'}
+                </div>
+              )}
               <div className="divide-y divide-white/5">
-                {mockPolicies.map((policy, i) => (
+                {displayedPolicies.map((policy, i) => {
+                  const status = computePolicyStatus(policy)
+                  const route = getPolicyRoute(policy)
+                  const explorerTx = isUsingDemoData ? undefined : getExplorerTx(policy)
+
+                  return (
                   <motion.div
                     key={policy.id}
                     initial={{ opacity: 0, x: -10 }}
@@ -167,47 +394,53 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          policy.status === 'active'  ? 'bg-emerald-400/10 border border-emerald-400/20' :
-                          policy.status === 'paid'    ? 'bg-cyan-400/10 border border-cyan-400/20' :
-                          'bg-zinc-800 border border-zinc-700'
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          status === 'active' ? 'bg-emerald-400/10 border border-emerald-400/20' :
+                          'bg-cyan-400/10 border border-cyan-400/20'
                         }`}>
                           <Plane className={`w-4 h-4 ${
-                            policy.status === 'active'  ? 'text-emerald-400' :
-                            policy.status === 'paid'    ? 'text-cyan-400' :
-                            'text-zinc-600'
+                            status === 'active' ? 'text-emerald-400' : 'text-cyan-400'
                           }`} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-sm text-white">{policy.flight}</span>
+                            <span className="font-mono font-bold text-sm text-slate-900">{policy.flightNumber}</span>
                             <span className="text-zinc-500 text-xs">·</span>
-                            <span className="text-zinc-300 text-xs">{policy.route}</span>
+                            <span className="text-zinc-300 text-xs">{route}</span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Calendar className="w-3 h-3 text-zinc-600" />
-                            <span className="text-xs text-zinc-400">{policy.date}</span>
+                            <span className="text-xs text-zinc-400">{formatDateLabel(policy.createdAt)}</span>
                             <span className="text-zinc-500 text-xs">·</span>
-                            <span className="text-xs text-zinc-400">{policy.id}</span>
+                            <span className="text-xs text-zinc-400">{policy.id.slice(-8).toUpperCase()}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-white">{policy.coverage} ALGO</p>
-                        {policy.status === 'paid' && policy.delayMinutes && (
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-slate-900">{policy.coverage} ALGO</p>
+                        {status === 'paid' && policy.delayMinutes !== undefined && (
                           <p className="text-xs text-emerald-400 mt-0.5">{policy.delayMinutes}m delay</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-3">
-                      <StatusBadge status={policy.status} />
-                      <button className="text-xs text-zinc-400 hover:text-zinc-300 flex items-center gap-1 transition-colors">
-                        <ExternalLink className="w-3 h-3" />
-                        View on-chain
-                      </button>
+                      <StatusBadge status={status} />
+                      {explorerTx ? (
+                        <a
+                          href={`https://testnet.explorer.perawallet.app/tx/${explorerTx}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-zinc-400 hover:text-zinc-300 flex items-center gap-1 transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          View on-chain
+                        </a>
+                      ) : (
+                        <span className="text-xs text-zinc-500">Pending tx link</span>
+                      )}
                     </div>
                   </motion.div>
-                ))}
+                )})}
               </div>
             </motion.div>
           </div>
@@ -219,7 +452,10 @@ export default function DashboardPage() {
                 <h2 className="font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Activity</h2>
               </div>
               <div className="p-4 space-y-1">
-                {mockActivity.map((item, i) => (
+                {!activityItems.length && (
+                  <p className="text-xs text-zinc-400 px-3 py-2">No activity yet. Policy events will appear here after a buy.</p>
+                )}
+                {activityItems.map((item, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: 10 }}
@@ -227,22 +463,20 @@ export default function DashboardPage() {
                     transition={{ delay: 0.35 + i * 0.07 }}
                     className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/3 transition-colors"
                   >
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
                       item.color === 'emerald' ? 'bg-emerald-400/10' :
                       item.color === 'cyan'    ? 'bg-cyan-400/10' :
-                      item.color === 'violet'  ? 'bg-violet-400/10' :
-                      'bg-zinc-800'
+                      'bg-violet-400/10'
                     }`}>
                       {item.type === 'payout'  && <Zap className="w-3.5 h-3.5 text-emerald-400" />}
                       {item.type === 'policy'  && <Shield className="w-3.5 h-3.5 text-cyan-400" />}
                       {item.type === 'oracle'  && <Activity className="w-3.5 h-3.5 text-violet-400" />}
-                      {item.type === 'expired' && <Clock className="w-3.5 h-3.5 text-zinc-500" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-zinc-300">{item.text}</p>
                       <p className="text-xs text-zinc-400 truncate">{item.subtext}</p>
                     </div>
-                    <span className="text-[10px] text-zinc-500 flex-shrink-0">{item.time}</span>
+                    <span className="text-[10px] text-zinc-500 shrink-0">{item.time}</span>
                   </motion.div>
                 ))}
               </div>

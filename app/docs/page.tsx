@@ -33,13 +33,13 @@ function CodeBlock({ code, language = 'typescript' }: { code: string; language?:
   return (
     <div className="relative group glass rounded-xl overflow-hidden my-4">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-        <span className="text-xs text-zinc-600">{language}</span>
-        <button onClick={copy} className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors opacity-0 group-hover:opacity-100">
+        <span className="text-xs text-slate-600 font-medium">{language}</span>
+        <button onClick={copy} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-800 transition-colors opacity-0 group-hover:opacity-100">
           {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-xs leading-relaxed text-zinc-300 font-mono">{code}</pre>
+      <pre className="p-4 overflow-x-auto text-xs leading-relaxed text-slate-800 font-mono">{code}</pre>
     </div>
   )
 }
@@ -47,7 +47,7 @@ function CodeBlock({ code, language = 'typescript' }: { code: string; language?:
 function SectionHeader({ id, title, badge }: { id: string; title: string; badge?: string }) {
   return (
     <div id={id} className="flex items-center gap-3 mb-6 pt-2">
-      <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>{title}</h2>
+      <h2 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>{title}</h2>
       {badge && <Badge className="bg-cyan-400/10 text-cyan-400 border-cyan-400/20 text-xs">{badge}</Badge>}
     </div>
   )
@@ -64,8 +64,7 @@ export default function DocsPage() {
           {/* Sidebar nav */}
           <aside className="md:col-span-1">
             <motion.div {...fadeUp()} className="sticky top-24">
-              <p className="text-xs uppercase tracking-widest text-zinc-600 mb-3 px-3">Documentation</p>
-                <p className="text-xs uppercase tracking-widest text-zinc-400 font-semibold mb-3 px-3">Documentation</p>
+              <p className="text-xs uppercase tracking-widest text-slate-700 font-semibold mb-3 px-3">Documentation</p>
               <nav className="space-y-0.5">
                 {sections.map(section => (
                   <a
@@ -76,7 +75,7 @@ export default function DocsPage() {
                       'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all',
                       activeSection === section.id
                         ? 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/20'
-                        : 'text-zinc-300 hover:text-white hover:bg-white/5'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-white/5'
                     )}
                   >
                     <section.icon className="w-4 h-4 flex-shrink-0" />
@@ -86,7 +85,7 @@ export default function DocsPage() {
               </nav>
 
               <div className="mt-6 glass rounded-xl p-4 border border-violet-400/10">
-                <p className="text-xs text-zinc-400 font-medium mb-2">Need help?</p>
+                <p className="text-xs text-slate-700 font-medium mb-2">Need help?</p>
                 <a href="#" className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors">
                   Join Discord <ExternalLink className="w-3 h-3" />
                 </a>
@@ -100,12 +99,12 @@ export default function DocsPage() {
             {/* Overview */}
             <motion.section {...fadeUp(0.1)}>
               <SectionHeader id="overview" title="Overview" badge="v1.0 MVP" />
-              <p className="text-zinc-400 leading-relaxed mb-4">
+              <p className="text-slate-700 leading-relaxed mb-4">
                 AeroShield is a parametric insurance protocol built on the Algorand blockchain.
                 Unlike traditional insurance, parametric insurance removes the claims process entirely —
                 payout is automatic the moment a predefined data condition is met.
               </p>
-              <p className="text-zinc-400 leading-relaxed mb-6">
+              <p className="text-slate-700 leading-relaxed mb-6">
                 The MVP focuses on flight delay insurance, where an oracle monitors real-time flight data
                 and triggers an atomic inner transaction to pay the policyholder when a departure delay
                 exceeds the threshold set at policy purchase.
@@ -113,22 +112,22 @@ export default function DocsPage() {
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
                   { label: 'Smart Contract', value: 'Algorand TypeScript', color: 'cyan' },
-                  { label: 'Oracle',         value: 'AviationStack API',   color: 'violet' },
-                  { label: 'Network',        value: 'Algorand TestNet',    color: 'emerald' },
+                  { label: 'Oracle', value: 'AviationStack API', color: 'violet' },
+                  { label: 'Network', value: 'Algorand TestNet', color: 'emerald' },
                 ].map(item => (
                   <div key={item.label} className="glass rounded-xl p-4">
-                    <p className="text-xs text-zinc-600 mb-1">{item.label}</p>
+                    <p className="text-xs text-slate-600 mb-1">{item.label}</p>
                     <p className={`text-sm font-medium ${
-                      item.color === 'cyan'    ? 'text-cyan-400' :
-                      item.color === 'violet'  ? 'text-violet-400' :
+                      item.color === 'cyan' ? 'text-cyan-400' :
+                      item.color === 'violet' ? 'text-violet-400' :
                       'text-emerald-400'
                     }`}>{item.value}</p>
                   </div>
                 ))}
               </div>
+            </motion.section>
 
             {/* Architecture */}
-                        </motion.section>
 
             <motion.section {...fadeUp(0.15)}>
               <SectionHeader id="architecture" title="Architecture" />
@@ -160,8 +159,8 @@ export default function DocsPage() {
                         item.color === 'violet' ? 'text-violet-400' : 'text-emerald-400'
                       }`} />
                       <div>
-                        <p className="font-medium text-white text-sm mb-1">{item.title}</p>
-                        <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+                        <p className="font-medium text-slate-900 text-sm mb-1">{item.title}</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   </div>
@@ -172,7 +171,7 @@ export default function DocsPage() {
             {/* Smart Contract */}
             <motion.section {...fadeUp(0.2)}>
               <SectionHeader id="contract" title="Smart Contract" badge="Algorand TypeScript" />
-              <p className="text-zinc-400 leading-relaxed mb-4">
+              <p className="text-slate-700 leading-relaxed mb-4">
                 The contract exposes two ABI methods: <code className="text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded text-xs">buyPolicy</code> and <code className="text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded text-xs">triggerPayout</code>.
                 Only the authorized oracle address can call triggerPayout.
               </p>
@@ -223,7 +222,7 @@ export class AeroShield extends Contract {
             {/* Oracle */}
             <motion.section {...fadeUp(0.25)}>
               <SectionHeader id="oracle" title="Oracle Layer" />
-              <p className="text-zinc-400 leading-relaxed mb-4">
+              <p className="text-slate-700 leading-relaxed mb-4">
                 The oracle is a Next.js API route that acts as a trusted bridge between AviationStack's REST API and the Algorand smart contract.
                 In production, this will be replaced by Goracle Network nodes for trustless decentralization.
               </p>
@@ -295,16 +294,16 @@ export async function GET(req: NextRequest) {
                       }>
                         {endpoint.method}
                       </Badge>
-                      <code className="text-sm text-zinc-300">{endpoint.path}</code>
+                      <code className="text-sm text-slate-800">{endpoint.path}</code>
                     </div>
                     <div className="px-5 py-4">
-                      <p className="text-sm text-zinc-400 mb-4">{endpoint.desc}</p>
+                      <p className="text-sm text-slate-700 mb-4">{endpoint.desc}</p>
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-left">
-                            <th className="text-zinc-600 pb-2 font-medium">Parameter</th>
-                            <th className="text-zinc-600 pb-2 font-medium">Type</th>
-                            <th className="text-zinc-600 pb-2 font-medium">Description</th>
+                            <th className="text-slate-700 pb-2 font-medium">Parameter</th>
+                            <th className="text-slate-700 pb-2 font-medium">Type</th>
+                            <th className="text-slate-700 pb-2 font-medium">Description</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -314,7 +313,7 @@ export async function GET(req: NextRequest) {
                                 <code className="text-cyan-400">{param.name}</code>
                               </td>
                               <td className="py-2 pr-4 text-violet-400">{param.type}</td>
-                              <td className="py-2 text-zinc-500">{param.desc}</td>
+                              <td className="py-2 text-slate-600">{param.desc}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -340,7 +339,7 @@ export async function GET(req: NextRequest) {
                       <span className="text-xs text-cyan-400 font-bold">{item.step}</span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-white mb-1">{item.title}</p>
+                      <p className="text-sm font-medium text-slate-900 mb-1">{item.title}</p>
                       <CodeBlock language="bash" code={item.code} />
                     </div>
                   </div>
