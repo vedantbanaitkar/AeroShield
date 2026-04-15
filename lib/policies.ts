@@ -211,18 +211,9 @@ class DbPolicyRepository implements PolicyRepository {
 
 // Auto-select repository based on environment
 function initializeRepository(): PolicyRepository {
-  // Prefer database when available (both dev and production)
-  if (typeof window === 'undefined') {
-    // Server-side: always use database
-    return new DbPolicyRepository()
-  }
-  // Client-side: prefer database if DATABASE_URL is configured
-  // Fall back to localStorage only if database is not available
-  if (process.env.DATABASE_URL) {
-    return new DbPolicyRepository()
-  }
-  // Last resort: use localStorage
-  return new LocalStoragePolicyRepository()
+  // Always use database-backed API repository for both local and deployed environments.
+  // API routes hold DB credentials server-side; client never needs direct DATABASE_URL access.
+  return new DbPolicyRepository()
 }
 
 export const policyRepository: PolicyRepository = initializeRepository()

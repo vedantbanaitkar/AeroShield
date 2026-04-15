@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Shield,
@@ -10,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   FileX,
+  ChevronLeft,
   ChevronRight,
   Star,
   Plane,
@@ -141,7 +143,69 @@ const testimonials = [
   },
 ];
 
+const heroPolicies = [
+  {
+    policyNo: "#AS-48291",
+    status: "Active",
+    fromCode: "BOM",
+    fromCity: "Mumbai",
+    toCode: "DEL",
+    toCity: "Delhi",
+    flight: "AI-302",
+    date: "15 Apr 2026",
+    coverage: "10 ALGO",
+    threshold: "2 hr delay",
+    wallet: "0x3a4f...8c21",
+  },
+  {
+    policyNo: "#AS-49507",
+    status: "Active",
+    fromCode: "BLR",
+    fromCity: "Bengaluru",
+    toCode: "HYD",
+    toCity: "Hyderabad",
+    flight: "6E-741",
+    date: "19 Apr 2026",
+    coverage: "25 ALGO",
+    threshold: "90 min delay",
+    wallet: "0x98bc...114a",
+  },
+  {
+    policyNo: "#AS-50338",
+    status: "Active",
+    fromCode: "MAA",
+    fromCity: "Chennai",
+    toCode: "CCU",
+    toCity: "Kolkata",
+    flight: "SG-517",
+    date: "22 Apr 2026",
+    coverage: "15 ALGO",
+    threshold: "3 hr delay",
+    wallet: "0xbe26...ca09",
+  },
+];
+
 function PolicyCard() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = (index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const bounded = Math.max(0, Math.min(heroPolicies.length - 1, index));
+    container.scrollTo({ left: container.clientWidth * bounded, behavior: "smooth" });
+    setActiveIndex(bounded);
+  };
+
+  const onScrollCards = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const next = Math.round(container.scrollLeft / container.clientWidth);
+    if (next !== activeIndex) {
+      setActiveIndex(next);
+    }
+  };
+
   return (
     <motion.div
       className="float relative mx-auto w-full max-w-sm"
@@ -159,64 +223,119 @@ function PolicyCard() {
           <div className="scan-line" />
         </div>
 
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <p className="mb-1 text-xs uppercase tracking-[0.28em] text-stone-500">
-              Insurance Policy
-            </p>
-            <p className="font-mono text-xs text-stone-500">#AS-48291</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="status-dot" />
-            <span className="text-xs font-medium text-emerald-700">Active</span>
-          </div>
-        </div>
-
-        <div className="mb-6 flex items-center justify-between">
-          <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-stone-900">BOM</p>
-            <p className="mt-0.5 text-xs text-stone-500">Mumbai</p>
-          </div>
-          <div className="flex flex-1 items-center justify-center gap-1 px-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-stone-300" />
-            <Plane className="h-4 w-4 rotate-90 text-sky-700" />
-            <div className="h-px flex-1 bg-gradient-to-r from-stone-300 to-transparent" />
-          </div>
-          <div className="text-center">
-            <p className="font-mono text-2xl font-bold text-stone-900">DEL</p>
-            <p className="mt-0.5 text-xs text-stone-500">Delhi</p>
-          </div>
-        </div>
-
-        <div className="mb-5 grid grid-cols-2 gap-3">
-          {[
-            { label: "Flight", value: "AI-302" },
-            { label: "Date", value: "15 Apr 2026" },
-            { label: "Coverage", value: "10 ALGO" },
-            { label: "Threshold", value: "2 hr delay" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-lg border border-stone-200 bg-stone-50 p-2.5"
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-stone-500">
+            Live Policies
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => scrollToIndex(activeIndex - 1)}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-stone-300 bg-white/70 text-stone-600 transition hover:border-stone-400 hover:text-stone-800"
+              aria-label="Previous policy"
             >
-              <p className="text-[10px] uppercase tracking-wider text-stone-500">
-                {item.label}
-              </p>
-              <p className="mt-0.5 text-sm font-medium text-stone-900">
-                {item.value}
-              </p>
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToIndex(activeIndex + 1)}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-stone-300 bg-white/70 text-stone-600 transition hover:border-stone-400 hover:text-stone-800"
+              aria-label="Next policy"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={onScrollCards}
+          className="scrollbar-card-row -mx-2 flex snap-x snap-mandatory gap-4 overflow-x-auto px-2 pb-2"
+        >
+          {heroPolicies.map((policy) => (
+            <div
+              key={policy.policyNo}
+              className="min-w-full snap-center"
+            >
+              <div className="mb-6 flex items-start justify-between">
+                <div>
+                  <p className="mb-1 text-xs uppercase tracking-[0.28em] text-stone-500">
+                    Insurance Policy
+                  </p>
+                  <p className="font-mono text-xs text-stone-500">{policy.policyNo}</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="status-dot" />
+                  <span className="text-xs font-medium text-emerald-700">{policy.status}</span>
+                </div>
+              </div>
+
+              <div className="mb-6 flex items-center justify-between">
+                <div className="text-center">
+                  <p className="font-mono text-2xl font-bold text-stone-900">{policy.fromCode}</p>
+                  <p className="mt-0.5 text-xs text-stone-500">{policy.fromCity}</p>
+                </div>
+                <div className="flex flex-1 items-center justify-center gap-1 px-4">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent to-stone-300" />
+                  <Plane className="h-4 w-4 rotate-90 text-sky-700" />
+                  <div className="h-px flex-1 bg-gradient-to-r from-stone-300 to-transparent" />
+                </div>
+                <div className="text-center">
+                  <p className="font-mono text-2xl font-bold text-stone-900">{policy.toCode}</p>
+                  <p className="mt-0.5 text-xs text-stone-500">{policy.toCity}</p>
+                </div>
+              </div>
+
+              <div className="mb-5 grid grid-cols-2 gap-3">
+                {[
+                  { label: "Flight", value: policy.flight },
+                  { label: "Date", value: policy.date },
+                  { label: "Coverage", value: policy.coverage },
+                  { label: "Threshold", value: policy.threshold },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-lg border border-stone-200 bg-stone-50 p-2.5"
+                  >
+                    <p className="text-[10px] uppercase tracking-wider text-stone-500">
+                      {item.label}
+                    </p>
+                    <p className="mt-0.5 text-sm font-medium text-stone-900">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between border-t border-stone-200 pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400">
+                    <Shield className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-xs text-stone-600">Algorand TestNet</span>
+                </div>
+                <p className="font-mono text-xs text-stone-500">{policy.wallet}</p>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-stone-200 pt-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400">
-              <Shield className="h-3 w-3 text-white" />
-            </div>
-            <span className="text-xs text-stone-600">Algorand TestNet</span>
-          </div>
-          <p className="font-mono text-xs text-stone-500">0x3a4f...8c21</p>
+        <div className="mt-2 flex items-center justify-center gap-1.5">
+          {heroPolicies.map((policy, index) => (
+            <button
+              key={policy.policyNo}
+              type="button"
+              onClick={() => scrollToIndex(index)}
+              aria-label={`Go to policy ${index + 1}`}
+              className={`h-1.5 rounded-full transition-all ${
+                activeIndex === index ? "w-5 bg-sky-600" : "w-2 bg-stone-300 hover:bg-stone-400"
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="mt-2 text-center text-[11px] text-stone-500">
+          Swipe or use arrows to explore active policies
         </div>
       </div>
     </motion.div>
