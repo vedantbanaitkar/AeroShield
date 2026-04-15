@@ -5,6 +5,7 @@ import {
   WalletId,
   NetworkId,
 } from "@txnlab/use-wallet-react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const dappUrl =
   process.env.NEXT_PUBLIC_DAPP_URL ?? "https://aeroshield.vercel.app";
@@ -30,5 +31,9 @@ const manager = new WalletManager({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <WalletProvider manager={manager}>{children}</WalletProvider>;
+  return (
+    <ThemeProvider>
+      <WalletProvider manager={manager}>{children}</WalletProvider>
+    </ThemeProvider>
+  );
 }

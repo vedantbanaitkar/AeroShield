@@ -4,10 +4,19 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWallet } from "@txnlab/use-wallet-react";
-import { Shield, Menu, X, ChevronRight, Zap } from "lucide-react";
+import {
+  Shield,
+  Menu,
+  X,
+  ChevronRight,
+  Zap,
+  Moon,
+  SunMedium,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme-provider";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,6 +29,7 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const { activeAccount, wallets } = useWallet();
+  const { theme, toggleTheme } = useTheme();
   const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
   const [isHydrated, setIsHydrated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,10 +52,14 @@ export function Navbar() {
 
   function isConnectCancelledError(error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    return /modal is closed by user|cancelled|canceled|rejected|proposal expired|session expired/i.test(message.toLowerCase());
+    return /modal is closed by user|cancelled|canceled|rejected|proposal expired|session expired/i.test(
+      message.toLowerCase(),
+    );
   }
 
-  async function tryConnect(walletId: string): Promise<"connected" | "cancelled" | "failed"> {
+  async function tryConnect(
+    walletId: string,
+  ): Promise<"connected" | "cancelled" | "failed"> {
     const wallet = wallets?.find((w) => w.id === walletId);
     if (!wallet) return "failed";
 
@@ -95,8 +109,8 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           scrolled
-            ? "bg-[#fffdf8]/90 backdrop-blur-xl border-b border-stone-200"
-            : "bg-transparent",
+            ? "bg-[#fffdf8]/90 backdrop-blur-xl border-b border-stone-200 dark:bg-slate-950/85 dark:border-slate-700/60"
+            : "bg-transparent dark:bg-transparent",
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -104,7 +118,7 @@ export function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-sky-200/50 rounded-lg blur-md group-hover:bg-sky-300/60 transition-all" />
+                <div className="absolute inset-0 bg-sky-200/50 rounded-lg blur-md group-hover:bg-sky-300/60 dark:bg-sky-900/35 dark:group-hover:bg-sky-800/45 transition-all" />
                 <div className="relative w-8 h-8 bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg flex items-center justify-center">
                   <Shield className="w-4 h-4 text-white" strokeWidth={2.5} />
                 </div>
@@ -113,11 +127,12 @@ export function Navbar() {
                 className="font-syne font-700 text-lg tracking-tight"
                 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700 }}
               >
-                Aero<span className="text-sky-700">Shield</span>
+                <span className="text-slate-800 dark:text-slate-100">Aero</span>
+                <span className="text-sky-700 dark:text-sky-400">Shield</span>
               </span>
               <Badge
                 variant="secondary"
-                className="text-[10px] border-stone-300 text-stone-700 bg-stone-100 hidden sm:inline-flex"
+                className="text-[10px] border-stone-300 text-stone-700 bg-stone-100 dark:border-slate-700 dark:text-slate-300 dark:bg-slate-800 hidden sm:inline-flex"
               >
                 TESTNET
               </Badge>
@@ -132,8 +147,8 @@ export function Navbar() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                     pathname === link.href
-                      ? "text-stone-900 bg-stone-200 border border-stone-300"
-                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-100",
+                      ? "text-stone-900 bg-stone-200 border border-stone-300 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
+                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/80",
                   )}
                 >
                   {link.label}
@@ -143,13 +158,29 @@ export function Navbar() {
 
             {/* Wallet + CTA */}
             <div className="hidden lg:flex items-center gap-3">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass glass-hover text-sm"
+                aria-label="Toggle dark mode"
+                title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              >
+                {theme === "dark" ? (
+                  <SunMedium className="w-3.5 h-3.5 text-amber-300" />
+                ) : (
+                  <Moon className="w-3.5 h-3.5 text-sky-700" />
+                )}
+                <span className="text-stone-700 font-medium text-xs hidden xl:inline">
+                  {theme === "dark" ? "Light" : "Dark"}
+                </span>
+              </button>
               {showConnectedWallet ? (
                 <button
                   onClick={handleDisconnect}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass glass-hover text-sm"
                 >
                   <div className="status-dot" />
-                  <span className="text-stone-700 font-mono text-xs">
+                  <span className="text-stone-700 dark:text-slate-200 font-mono text-xs">
                     {shortAddress}
                   </span>
                 </button>
@@ -167,7 +198,7 @@ export function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              className="lg:hidden p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+              className="lg:hidden p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100 dark:text-slate-300 dark:hover:text-slate-100 dark:hover:bg-slate-800/80"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? (
@@ -187,7 +218,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed inset-x-0 top-16 z-40 bg-[#fffdf8]/95 backdrop-blur-xl border-b border-stone-200 lg:hidden"
+            className="fixed inset-x-0 top-16 z-40 bg-[#fffdf8]/95 backdrop-blur-xl border-b border-stone-200 dark:bg-slate-950/95 dark:border-slate-700/60 lg:hidden"
           >
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link) => (
@@ -198,22 +229,37 @@ export function Navbar() {
                   className={cn(
                     "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all",
                     pathname === link.href
-                      ? "text-stone-900 bg-stone-200 border border-stone-300"
-                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-100",
+                      ? "text-stone-900 bg-stone-200 border border-stone-300 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
+                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/80",
                   )}
                 >
                   {link.label}
                   <ChevronRight className="w-4 h-4 opacity-40" />
                 </Link>
               ))}
-              <div className="pt-3 border-t border-stone-200">
+              <div className="pt-3 border-t border-stone-200 dark:border-slate-700/60">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="w-full mb-2 flex items-center justify-center gap-2 py-3 rounded-xl glass text-sm"
+                  aria-label="Toggle dark mode"
+                >
+                  {theme === "dark" ? (
+                    <SunMedium className="w-4 h-4 text-amber-300" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-sky-700" />
+                  )}
+                  <span className="font-medium text-stone-700">
+                    {theme === "dark" ? "Light mode" : "Dark mode"}
+                  </span>
+                </button>
                 {showConnectedWallet ? (
                   <button
                     onClick={handleDisconnect}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl glass text-sm"
                   >
                     <div className="status-dot" />
-                    <span className="font-mono text-xs text-stone-700">
+                    <span className="font-mono text-xs text-stone-700 dark:text-slate-200">
                       {shortAddress}
                     </span>
                   </button>

@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import type { PolicyRecord } from '@/lib/policies';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import type { PolicyRecord } from "@/lib/policies";
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,20 +8,23 @@ export async function POST(request: NextRequest) {
     const { walletAddress } = body;
 
     if (!walletAddress) {
-      return NextResponse.json({ error: 'walletAddress required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "walletAddress required" },
+        { status: 400 },
+      );
     }
 
     const records = await prisma.policy.findMany({
       where: { walletAddress: walletAddress.toLowerCase() },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { updatedAt: "desc" },
     });
 
-    const policies: PolicyRecord[] = records.map(record => ({
+    const policies: PolicyRecord[] = records.map((record) => ({
       id: record.id,
       walletAddress: record.walletAddress,
       productId: record.productId as any,
       productLabel: record.productId,
-      flightNumber: '',
+      flightNumber: "",
       coverage: record.coverage,
       premium: record.premium,
       appId: 1000,
@@ -36,7 +39,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ policies });
   } catch (error) {
-    console.error('POST /api/policies error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("POST /api/policies error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

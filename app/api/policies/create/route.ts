@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import type { PolicyRecord, CreatePolicyRecordInput } from '@/lib/policies';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import type { PolicyRecord, CreatePolicyRecordInput } from "@/lib/policies";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
 
     if (!walletAddress || !productId) {
       return NextResponse.json(
-        { error: 'walletAddress and productId required' },
-        { status: 400 }
+        { error: "walletAddress and productId required" },
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         coverage: coverage || 0,
         premium: premium || 0,
         buyTxId: appCallTxId || premiumPaymentTxId || `tx_${Date.now()}`,
-        status: 'active',
+        status: "active",
       },
     });
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       walletAddress: policy.walletAddress,
       productId: policy.productId as any,
       productLabel: productId,
-      flightNumber: '',
+      flightNumber: "",
       coverage: policy.coverage,
       premium: policy.premium,
       appId: 1000,
@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ policy: result }, { status: 201 });
   } catch (error) {
-    console.error('POST /api/policies/create error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("POST /api/policies/create error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

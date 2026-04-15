@@ -26,14 +26,17 @@ No UI changes needed! The repository pattern automatically switches backends.
 ## Next Steps
 
 ### Local Development
+
 ```bash
 npm run dev
 ```
+
 Works with localStorage. Great for testing locally.
 
 ### Deploy to Vercel
 
 1. **Push to GitHub**:
+
    ```bash
    git add .
    git commit -m "Add Neon database integration"
@@ -72,6 +75,7 @@ Trigger/Payout:
 ## Database Schema
 
 The `Policy` table stores:
+
 - `id`: Unique policy identifier
 - `walletAddress`: Algorand wallet address
 - `productId`: "flight", "weather", or "cargo"
@@ -86,11 +90,13 @@ The `Policy` table stores:
 ## Pricing
 
 **Neon Free Tier**:
+
 - 3 GB storage
 - Always-on micro compute
 - **$0/month** ✅
 
 **When you pay**:
+
 - Scaling beyond 3 GB
 - Upgrading to dedicated compute
 
@@ -111,14 +117,17 @@ For MVP, free tier is perfect!
 ## Troubleshooting
 
 ### "DATABASE_URL not found"
+
 Make sure it's in `.env.local` and the app is restarted.
 
 ### "Can't reach database server"
+
 - Check Neon dashboard: Is the project running?
 - Check connection string: Is it copied correctly?
 - Check Vercel logs: Are env vars set?
 
 ### "Policies still using localStorage on Vercel"
+
 - Did you push code to GitHub?
 - Did you redeploy on Vercel?
 - Did you set DATABASE_URL in Vercel settings?

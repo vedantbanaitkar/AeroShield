@@ -1,14 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import type { PolicyRecord } from '@/lib/policies';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import type { PolicyRecord } from "@/lib/policies";
 
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, payoutTxId, delayMinutes, payoutTriggeredAt, lastOracleCheckAt } = body;
+    const {
+      id,
+      payoutTxId,
+      delayMinutes,
+      payoutTriggeredAt,
+      lastOracleCheckAt,
+    } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'id required' }, { status: 400 });
+      return NextResponse.json({ error: "id required" }, { status: 400 });
     }
 
     const updateData: any = {
@@ -17,11 +23,13 @@ export async function PATCH(request: NextRequest) {
 
     if (payoutTxId) updateData.payoutTxId = payoutTxId;
     if (delayMinutes !== undefined) updateData.delayMinutes = delayMinutes;
-    if (payoutTriggeredAt) updateData.payoutTriggeredAt = new Date(payoutTriggeredAt);
-    if (lastOracleCheckAt) updateData.lastOracleCheckAt = new Date(lastOracleCheckAt);
+    if (payoutTriggeredAt)
+      updateData.payoutTriggeredAt = new Date(payoutTriggeredAt);
+    if (lastOracleCheckAt)
+      updateData.lastOracleCheckAt = new Date(lastOracleCheckAt);
 
     // Set status to 'paid' if payoutTxId is provided
-    if (payoutTxId) updateData.status = 'paid';
+    if (payoutTxId) updateData.status = "paid";
 
     const policy = await prisma.policy.update({
       where: { id },
@@ -33,7 +41,7 @@ export async function PATCH(request: NextRequest) {
       walletAddress: policy.walletAddress,
       productId: policy.productId as any,
       productLabel: policy.productId,
-      flightNumber: '',
+      flightNumber: "",
       coverage: policy.coverage,
       premium: policy.premium,
       appId: 1000,
@@ -48,7 +56,10 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ policy: result });
   } catch (error) {
-    console.error('PATCH /api/policies/update error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("PATCH /api/policies/update error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

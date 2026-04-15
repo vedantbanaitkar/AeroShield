@@ -25,8 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className="antialiased min-h-screen">
+    <html
+      lang="en"
+      className={cn("font-sans", geist.variable)}
+      suppressHydrationWarning
+    >
+      <body className="antialiased min-h-screen bg-background text-foreground">
         <Providers>
           <Navbar />
           <main>{children}</main>

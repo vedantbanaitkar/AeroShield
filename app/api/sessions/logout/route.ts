@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,7 +7,10 @@ export async function POST(request: NextRequest) {
     const { walletAddress } = body;
 
     if (!walletAddress) {
-      return NextResponse.json({ error: 'walletAddress required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "walletAddress required" },
+        { status: 400 },
+      );
     }
 
     const normalizedAddress = walletAddress.toLowerCase();
@@ -28,7 +31,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('POST /api/sessions/logout error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("POST /api/sessions/logout error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

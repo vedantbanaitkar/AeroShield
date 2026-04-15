@@ -29,9 +29,11 @@ git push origin main
 3. Click **Add**:
    - **Name**: `DATABASE_URL`
    - **Value**: (Copy from your `.env.local`)
+
    ```
    postgresql://neondb_owner:npg_Aucz37BVWIXN@ep-dry-shadow-a1qsxz6m.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
    ```
+
    - Click **Save**
 
 4. Redeploy:
@@ -50,7 +52,6 @@ git push origin main
 
 1. **Buy a Policy** on your Vercel link
    - Policy stored in **Neon database** ✅
-   
 2. **Refresh the page**
    - Policy still there (database, not localStorage) ✅
 
@@ -65,11 +66,11 @@ git push origin main
 
 ## Why This Works
 
-| Context | Storage | Persistence |
-|---------|---------|-------------|
-| `npm run dev` (localhost) | localStorage | Per browser (demo) |
-| Vercel (production) | Neon PostgreSQL | ✅ Cross-user, 24/7 |
-| Vercel (no DATABASE_URL) | localStorage | ❌ Lost on page refresh |
+| Context                   | Storage         | Persistence             |
+| ------------------------- | --------------- | ----------------------- |
+| `npm run dev` (localhost) | localStorage    | Per browser (demo)      |
+| Vercel (production)       | Neon PostgreSQL | ✅ Cross-user, 24/7     |
+| Vercel (no DATABASE_URL)  | localStorage    | ❌ Lost on page refresh |
 
 **The key**: When `DATABASE_URL` is set, `DbPolicyRepository` automatically takes over and all writes go to PostgreSQL instead of localStorage.
 
@@ -83,12 +84,14 @@ git push origin main
 ## After Recording Your Video
 
 If you want to keep policies permanently:
+
 1. Push code (already done ✅)
 2. Set DATABASE_URL on Vercel (3 minutes)
 3. Redeploy (2 minutes)
 4. Done! All policies persist forever
 
 If you just want to demo locally:
+
 - `npm run dev` works perfectly with localStorage
 - No Vercel changes needed
 - Demo fallback policies show up automatically

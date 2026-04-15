@@ -3,22 +3,26 @@
 ## What You Got
 
 ✅ **Complete Database-First Architecture**
+
 - Neon PostgreSQL for local development AND production
 - No more localStorage-only limitations
 - Persistent data across users, devices, and refreshes
 
 ✅ **Session Persistence** (Remember Me)
+
 - Wallet sessions stored in database
 - Auto-connect on app reload (optional UI integration)
 - Logout persists (user stays logged out until manual login)
 
 ✅ **Pre-Populated Mock Data**
+
 - 3 mock wallets with realistic policies
 - 5 policies (3 active, 2 paid with payouts)
 - Mix of flight, weather, and cargo products
 - Ready to demo immediately
 
 ✅ **Production-Ready Build**
+
 - All 17 routes compile successfully
 - TypeScript passes type checking
 - Zero runtime errors
@@ -45,6 +49,7 @@
 | ZZZZ...7Q | Inactive | 3 days ago | 1 (paid) |
 
 **Policy Distribution:**
+
 - Total: 5 policies
 - Active: 3 (ready to trigger)
 - Paid: 2 (with real payouts)
@@ -53,22 +58,27 @@
 ## How to Use
 
 ### Local Development
+
 ```bash
 npm run dev
 ```
+
 Dashboard immediately shows 5 mock policies. Connect with any wallet. Try Wallet 1 to see full portfolio.
 
 ### Seed Database Again (if needed)
+
 ```bash
 npm run db:seed
 ```
 
 ### View Database Tables (local only)
+
 ```bash
 npx prisma studio
 ```
 
 ### Deploy to Vercel
+
 1. Push to GitHub
 2. Add `DATABASE_URL` env var
 3. Deploy → Done! All data persists
@@ -85,12 +95,14 @@ npx prisma studio
 ## Your Next Steps
 
 ### For MVP Video
+
 1. Run `npm run dev`
 2. Open dashboard - see 5 policies instantly
 3. Interact with Wallet 1 policies
 4. Record your demo!
 
 ### For Production
+
 1. Push code to GitHub
 2. Set `DATABASE_URL` on Vercel
 3. Redeploy → All users get persistent storage
