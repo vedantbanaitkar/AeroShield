@@ -21,8 +21,13 @@ export function Navbar() {
   const pathname = usePathname();
   const { activeAccount, wallets } = useWallet();
   const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
+  const [isHydrated, setIsHydrated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -33,6 +38,7 @@ export function Navbar() {
   const shortAddress = activeAccount
     ? `${activeAccount.address.slice(0, 4)}...${activeAccount.address.slice(-4)}`
     : null;
+  const showConnectedWallet = isHydrated && !!activeAccount;
 
   function handleConnect() {
     const preferredOrder =
@@ -109,7 +115,7 @@ export function Navbar() {
 
             {/* Wallet + CTA */}
             <div className="hidden lg:flex items-center gap-3">
-              {activeAccount ? (
+              {showConnectedWallet ? (
                 <button
                   onClick={handleDisconnect}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass glass-hover text-sm"
@@ -173,7 +179,7 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="pt-3 border-t border-stone-200">
-                {activeAccount ? (
+                {showConnectedWallet ? (
                   <button
                     onClick={handleDisconnect}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl glass text-sm"
