@@ -1,385 +1,443 @@
-'use client'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
-import Link from 'next/link'
-import {
-  Shield, Zap, Globe, ArrowRight, CheckCircle2,
-  Clock, FileX, TrendingUp, ChevronRight, Star,
-  Plane, CloudRain, Ship, Wheat, Lock, Activity
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+"use client";
 
-/* ─── tiny animation helpers ─── */
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Shield,
+  Zap,
+  Globe,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  FileX,
+  ChevronRight,
+  Star,
+  Plane,
+  CloudRain,
+  Ship,
+  Wheat,
+  Lock,
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay },
-})
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as any, delay },
+});
 
 const fadeIn = (delay = 0) => ({
   initial: { opacity: 0 },
   whileInView: { opacity: 1 },
   viewport: { once: true },
   transition: { duration: 0.5, delay },
-})
+});
 
-/* ─── data ─── */
 const stats = [
-  { value: '< 3s',   label: 'Settlement time' },
-  { value: '0',      label: 'Claims to file' },
-  { value: '100%',   label: 'On-chain transparent' },
-  { value: '$0',     label: 'Hidden fees' },
-]
+  { value: "< 3s", label: "Settlement time" },
+  { value: "0", label: "Claims to file" },
+  { value: "100%", label: "On-chain transparent" },
+  { value: "$0", label: "Hidden fees" },
+];
 
 const steps = [
   {
-    number: '01',
+    number: "01",
     icon: Shield,
-    title: 'Buy a policy',
-    desc: 'Connect your Algorand wallet, enter your flight number and choose coverage. Pay a small premium — that\'s it.',
-    color: 'from-cyan-400/20 to-blue-500/10',
-    border: 'border-cyan-400/20',
-    iconColor: 'text-cyan-400',
+    title: "Buy a policy",
+    desc: "Connect your Algorand wallet, enter your flight number and choose coverage. Pay a small premium — that's it.",
+    color: "from-sky-200 to-cyan-100",
+    border: "border-stone-200",
+    iconColor: "text-sky-700",
   },
   {
-    number: '02',
+    number: "02",
     icon: Activity,
-    title: 'Oracle monitors',
-    desc: 'Our decentralized oracle network continuously monitors real-time flight data and feeds it to your smart contract.',
-    color: 'from-violet-400/20 to-purple-500/10',
-    border: 'border-violet-400/20',
-    iconColor: 'text-violet-400',
+    title: "Oracle monitors",
+    desc: "Our decentralized oracle network continuously monitors real-time flight data and feeds it to your smart contract.",
+    color: "from-violet-100 to-fuchsia-50",
+    border: "border-stone-200",
+    iconColor: "text-violet-700",
   },
   {
-    number: '03',
+    number: "03",
     icon: Zap,
-    title: 'Instant auto-payout',
-    desc: 'The moment your flight exceeds the delay threshold, the contract atomically transfers ALGO directly to your wallet.',
-    color: 'from-emerald-400/20 to-green-500/10',
-    border: 'border-emerald-400/20',
-    iconColor: 'text-emerald-400',
+    title: "Instant auto-payout",
+    desc: "The moment your flight exceeds the delay threshold, the contract atomically transfers ALGO directly to your wallet.",
+    color: "from-emerald-100 to-lime-50",
+    border: "border-stone-200",
+    iconColor: "text-emerald-700",
   },
-]
+];
 
 const problems = [
-  { icon: Clock,   label: 'Weeks of waiting',   old: true  },
-  { icon: FileX,   label: 'Endless paperwork',  old: true  },
-  { icon: Shield,  label: 'Human gatekeepers',  old: true  },
-  { icon: Zap,     label: 'Instant settlement', old: false },
-  { icon: Lock,    label: 'Zero trust needed',  old: false },
-  { icon: Globe,   label: 'Fully transparent',  old: false },
-]
+  { icon: Clock, label: "Weeks of waiting", old: true },
+  { icon: FileX, label: "Endless paperwork", old: true },
+  { icon: Shield, label: "Human gatekeepers", old: true },
+  { icon: Zap, label: "Instant settlement", old: false },
+  { icon: Lock, label: "Zero trust needed", old: false },
+  { icon: Globe, label: "Fully transparent", old: false },
+];
 
 const products = [
   {
     icon: Plane,
-    title: 'Flight Delay',
-    desc: 'Triggered by departure delay exceeding threshold.',
-    status: 'live',
-    statusLabel: 'Live on Testnet',
-    color: 'cyan',
+    title: "Flight Delay",
+    desc: "Triggered by departure delay exceeding threshold.",
+    status: "live",
+    statusLabel: "Live on Testnet",
+    color: "cyan",
   },
   {
     icon: CloudRain,
-    title: 'Crop Weather',
-    desc: 'Rainfall index drops below seasonal average.',
-    status: 'soon',
-    statusLabel: 'Coming Soon',
-    color: 'emerald',
+    title: "Crop Weather",
+    desc: "Rainfall index drops below seasonal average.",
+    status: "soon",
+    statusLabel: "Coming Soon",
+    color: "emerald",
   },
   {
     icon: Ship,
-    title: 'Cargo & Freight',
-    desc: 'Port delays and shipping route disruptions.',
-    status: 'soon',
-    statusLabel: 'Coming Soon',
-    color: 'violet',
+    title: "Cargo & Freight",
+    desc: "Port delays and shipping route disruptions.",
+    status: "soon",
+    statusLabel: "Coming Soon",
+    color: "violet",
   },
   {
     icon: Wheat,
-    title: 'Commodity Price',
-    desc: 'Spot price deviates from agreed strike price.',
-    status: 'soon',
-    statusLabel: 'Coming Soon',
-    color: 'amber',
+    title: "Commodity Price",
+    desc: "Spot price deviates from agreed strike price.",
+    status: "soon",
+    statusLabel: "Coming Soon",
+    color: "amber",
   },
-]
+];
 
 const testimonials = [
   {
-    quote: 'My flight was delayed 3 hours. Before I even landed, AeroShield had already sent ALGO to my wallet. This is the future of insurance.',
-    author: 'Arjun M.',
-    role: 'Early Tester',
+    quote:
+      "My flight was delayed 3 hours. Before I even landed, AeroShield had already sent ALGO to my wallet. This is the future of insurance.",
+    author: "Arjun M.",
+    role: "Early Tester",
     stars: 5,
   },
   {
-    quote: 'The traditional claim process took me 6 weeks last year. AeroShield settled in under a minute. No contest.',
-    author: 'Priya S.',
-    role: 'Frequent Flyer',
+    quote:
+      "The traditional claim process took me 6 weeks last year. AeroShield settled in under a minute. No contest.",
+    author: "Priya S.",
+    role: "Frequent Flyer",
     stars: 5,
   },
   {
-    quote: 'As someone who builds on Algorand, seeing parametric insurance done right on-chain is incredibly exciting.',
-    author: 'Devraj K.',
-    role: 'Algorand Developer',
+    quote:
+      "As someone who builds on Algorand, seeing parametric insurance done right on-chain is incredibly exciting.",
+    author: "Devraj K.",
+    role: "Algorand Developer",
     stars: 5,
   },
-]
+];
 
-/* ─── Policy card (floating hero element) ─── */
 function PolicyCard() {
   return (
     <motion.div
-      className="float relative w-full max-w-sm mx-auto"
-      initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
+      className="float relative mx-auto w-full max-w-sm"
+      initial={{ opacity: 0, scale: 0.94, rotateY: -8 }}
       animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-      transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: 0.8,
+        delay: 0.2,
+        ease: [0.22, 1, 0.36, 1] as any,
+      }}
     >
-      {/* Glow behind card */}
-      <div className="absolute inset-0 bg-cyan-400/10 rounded-3xl blur-2xl scale-110" />
-
-      {/* Card */}
-      <div className="relative glass border-gradient rounded-2xl overflow-hidden p-6">
-        {/* Scan line animation */}
+      <div className="absolute inset-0 rounded-3xl bg-sky-200/35 blur-2xl scale-110" />
+      <div className="relative glass border-gradient overflow-hidden rounded-2xl p-6 text-stone-800 shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
           <div className="scan-line" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="mb-6 flex items-start justify-between">
           <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Insurance Policy</p>
-            <p className="font-mono text-xs text-zinc-400">#AS-{Math.floor(Math.random() * 90000 + 10000)}</p>
+            <p className="mb-1 text-xs uppercase tracking-[0.28em] text-stone-500">
+              Insurance Policy
+            </p>
+            <p className="font-mono text-xs text-stone-500">#AS-48291</p>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="status-dot" />
-            <span className="text-xs text-emerald-400 font-medium">Active</span>
+            <span className="text-xs font-medium text-emerald-700">Active</span>
           </div>
         </div>
 
-        {/* Flight info */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div className="text-center">
-            <p className="text-2xl font-bold font-mono text-white">BOM</p>
-            <p className="text-xs text-zinc-500 mt-0.5">Mumbai</p>
+            <p className="font-mono text-2xl font-bold text-stone-900">BOM</p>
+            <p className="mt-0.5 text-xs text-stone-500">Mumbai</p>
           </div>
-          <div className="flex-1 flex items-center justify-center gap-1 px-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-zinc-700" />
-            <Plane className="w-4 h-4 text-cyan-400 rotate-90" />
-            <div className="h-px flex-1 bg-gradient-to-r from-zinc-700 to-transparent" />
+          <div className="flex flex-1 items-center justify-center gap-1 px-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-stone-300" />
+            <Plane className="h-4 w-4 rotate-90 text-sky-700" />
+            <div className="h-px flex-1 bg-gradient-to-r from-stone-300 to-transparent" />
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold font-mono text-white">DEL</p>
-            <p className="text-xs text-zinc-500 mt-0.5">Delhi</p>
+            <p className="font-mono text-2xl font-bold text-stone-900">DEL</p>
+            <p className="mt-0.5 text-xs text-stone-500">Delhi</p>
           </div>
         </div>
 
-        {/* Details grid */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="mb-5 grid grid-cols-2 gap-3">
           {[
-            { label: 'Flight', value: 'AI-302' },
-            { label: 'Date', value: '15 Apr 2026' },
-            { label: 'Coverage', value: '10 ALGO' },
-            { label: 'Threshold', value: '2 hr delay' },
-          ].map(item => (
-            <div key={item.label} className="bg-white/3 rounded-lg p-2.5">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{item.label}</p>
-              <p className="text-sm font-medium text-white mt-0.5">{item.value}</p>
+            { label: "Flight", value: "AI-302" },
+            { label: "Date", value: "15 Apr 2026" },
+            { label: "Coverage", value: "10 ALGO" },
+            { label: "Threshold", value: "2 hr delay" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="rounded-lg border border-stone-200 bg-stone-50 p-2.5"
+            >
+              <p className="text-[10px] uppercase tracking-wider text-stone-500">
+                {item.label}
+              </p>
+              <p className="mt-0.5 text-sm font-medium text-stone-900">
+                {item.value}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+        <div className="flex items-center justify-between border-t border-stone-200 pt-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-              <Shield className="w-3 h-3 text-black" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400">
+              <Shield className="h-3 w-3 text-white" />
             </div>
-            <span className="text-xs text-zinc-400">Algorand TestNet</span>
+            <span className="text-xs text-stone-600">Algorand TestNet</span>
           </div>
-          <p className="text-xs text-zinc-600 font-mono">0x3a4f...8c21</p>
+          <p className="font-mono text-xs text-stone-500">0x3a4f...8c21</p>
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
 
-/* ─── Page ─── */
 export default function HomePage() {
   return (
     <div className="relative overflow-hidden">
+      <section className="relative flex min-h-screen items-center pt-16">
+        <div className="grid-pattern pointer-events-none absolute inset-0 opacity-35" />
+        <div className="pointer-events-none absolute left-1/2 top-1/4 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-sky-200/25 blur-[120px]" />
 
-      {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center pt-16">
-        {/* Background grid */}
-        <div className="absolute inset-0 grid-pattern opacity-40" />
-        {/* Radial glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-cyan-400/5 rounded-full blur-[120px] pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left — copy */}
+        <div className="relative mx-auto grid w-full max-w-7xl gap-16 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center">
           <div>
-            <motion.div {...fadeIn(0.1)} className="flex items-center gap-2 mb-6">
-              <Badge className="bg-cyan-400/10 text-cyan-400 border-cyan-400/20 px-3 py-1 text-xs">
-                🚀 Built on Algorand · AlgoBharat Hack 3.0
+            <motion.div
+              {...fadeIn(0.1)}
+              className="mb-6 flex items-center gap-2"
+            >
+              <Badge className="border-sky-200 bg-sky-50 px-3 py-1 text-xs text-sky-700">
+                Built on Algorand · AlgoBharat Hack 3.0
               </Badge>
             </motion.div>
 
             <motion.h1
               {...fadeUp(0.15)}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6"
-              style={{ fontFamily: 'Syne, sans-serif' }}
+              className="mb-6 text-5xl font-bold leading-[1.05] tracking-tight text-stone-900 sm:text-6xl lg:text-7xl"
             >
-              Insurance that{' '}
-              <span className="text-gradient">pays itself.</span>
+              Insurance that <span className="text-gradient">pays itself.</span>
             </motion.h1>
 
-            <motion.p {...fadeUp(0.25)} className="text-lg text-zinc-400 leading-relaxed mb-8 max-w-lg">
-              Parametric flight delay insurance powered by Algorand smart contracts.
-              No claims, no adjusters, no waiting — your payout hits your wallet
-              the instant your flight crosses the delay threshold.
+            <motion.p
+              {...fadeUp(0.25)}
+              className="mb-8 max-w-lg text-lg leading-relaxed text-stone-600"
+            >
+              Parametric flight delay insurance powered by Algorand smart
+              contracts. No claims, no adjusters, no waiting. Your payout hits
+              your wallet the instant your flight crosses the delay threshold.
             </motion.p>
 
-            <motion.div {...fadeUp(0.35)} className="flex flex-wrap gap-3 mb-12">
+            <motion.div
+              {...fadeUp(0.35)}
+              className="mb-12 flex flex-wrap gap-3"
+            >
               <Link href="/app">
-                <Button size="lg" className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold gap-2 glow-cyan px-6">
-                  <Zap className="w-4 h-4" />
+                <Button
+                  size="lg"
+                  className="gap-2 bg-slate-900 px-6 font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.22)] hover:bg-slate-800"
+                >
+                  <Zap className="h-4 w-4" />
                   Get Insured Now
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/docs">
-                <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 text-zinc-300 gap-2 px-6">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 border-stone-300 px-6 text-stone-700 hover:bg-stone-100"
+                >
                   How it works
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Trust badges */}
-            <motion.div {...fadeIn(0.5)} className="flex flex-wrap items-center gap-6">
+            <motion.div
+              {...fadeIn(0.5)}
+              className="flex flex-wrap items-center gap-6"
+            >
               {[
-                { icon: Shield, label: 'Non-custodial' },
-                { icon: Lock,   label: 'Smart contract secured' },
-                { icon: Globe,  label: 'Fully transparent' },
-              ].map(item => (
-                <div key={item.label} className="flex items-center gap-2 text-zinc-500 text-sm">
-                  <item.icon className="w-4 h-4 text-cyan-400/60" />
+                { icon: Shield, label: "Non-custodial" },
+                { icon: Lock, label: "Smart contract secured" },
+                { icon: Globe, label: "Fully transparent" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-2 text-sm text-stone-500"
+                >
+                  <item.icon className="h-4 w-4 text-sky-600/70" />
                   {item.label}
                 </div>
               ))}
             </motion.div>
           </div>
 
-          {/* Right — policy card */}
-          <div className="lg:flex justify-center hidden">
+          <div className="hidden justify-center lg:flex">
             <PolicyCard />
           </div>
         </div>
       </section>
 
-      {/* ── Stats bar ── */}
-      <section className="border-y border-white/5 bg-white/[0.01]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <section className="border-y border-stone-200 bg-white/60">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((stat, i) => (
-              <motion.div key={stat.label} {...fadeIn(i * 0.1)} className="text-center">
-                <p className="text-3xl font-bold text-gradient-subtle" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <motion.div
+                key={stat.label}
+                {...fadeIn(i * 0.1)}
+                className="text-center"
+              >
+                <p className="text-3xl font-bold text-stone-900">
                   {stat.value}
                 </p>
-                <p className="text-sm text-zinc-500 mt-1">{stat.label}</p>
+                <p className="mt-1 text-sm text-stone-500">{stat.label}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Problem vs Solution ── */}
-      <section className="py-28 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <Badge className="bg-red-400/10 text-red-400 border-red-400/20 mb-4">The Problem</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
+      <section className="relative py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div {...fadeUp()} className="mb-16 text-center">
+            <Badge className="mb-4 border-red-200 bg-red-50 text-red-700">
+              The Problem
+            </Badge>
+            <h2 className="mb-4 text-4xl font-bold text-stone-900 sm:text-5xl">
               Traditional insurance is broken.
             </h2>
-            <p className="text-zinc-400 text-lg max-w-xl mx-auto">
-              You pay premiums for years, then fight to get paid when something goes wrong.
+            <p className="mx-auto max-w-xl text-lg text-stone-600">
+              You pay premiums for years, then fight to get paid when something
+              goes wrong.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Old way */}
-            <motion.div {...fadeUp(0.1)} className="glass rounded-2xl p-6 border-red-400/10">
-              <p className="text-xs uppercase tracking-widest text-red-400 mb-4">Traditional Insurance</p>
+          <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+            <motion.div
+              {...fadeUp(0.1)}
+              className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
+            >
+              <p className="mb-4 text-xs uppercase tracking-[0.28em] text-stone-500">
+                Traditional Insurance
+              </p>
               <div className="space-y-3">
-                {problems.filter(p => p.old).map(item => (
-                  <div key={item.label} className="flex items-center gap-3 text-zinc-400">
-                    <div className="w-6 h-6 rounded-full bg-red-400/10 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-3 h-3 text-red-400" />
+                {problems
+                  .filter((p) => p.old)
+                  .map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-3 text-stone-500"
+                    >
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-50 flex-shrink-0">
+                        <item.icon className="h-3 w-3 text-red-600" />
+                      </div>
+                      <span className="text-sm line-through opacity-60">
+                        {item.label}
+                      </span>
                     </div>
-                    <span className="text-sm line-through opacity-60">{item.label}</span>
-                  </div>
-                ))}
+                  ))}
               </div>
             </motion.div>
 
-            {/* New way */}
-            <motion.div {...fadeUp(0.2)} className="glass rounded-2xl p-6 border-cyan-400/10 glow-cyan">
-              <p className="text-xs uppercase tracking-widest text-cyan-400 mb-4">AeroShield</p>
+            <motion.div
+              {...fadeUp(0.2)}
+              className="rounded-2xl border border-sky-200 bg-sky-50 p-6 shadow-[0_0_0_1px_rgba(125,211,252,0.15)]"
+            >
+              <p className="mb-4 text-xs uppercase tracking-[0.28em] text-sky-700">
+                AeroShield
+              </p>
               <div className="space-y-3">
-                {problems.filter(p => !p.old).map(item => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-cyan-400/10 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-3 h-3 text-cyan-400" />
+                {problems
+                  .filter((p) => !p.old)
+                  .map((item) => (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 flex-shrink-0">
+                        <item.icon className="h-3 w-3 text-sky-700" />
+                      </div>
+                      <span className="text-sm text-stone-800">
+                        {item.label}
+                      </span>
+                      <CheckCircle2 className="ml-auto h-3.5 w-3.5 text-emerald-600" />
                     </div>
-                    <span className="text-sm text-white">{item.label}</span>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-auto" />
-                  </div>
-                ))}
+                  ))}
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="py-28 relative">
-        <div className="absolute inset-0 dot-pattern opacity-30" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <Badge className="bg-violet-400/10 text-violet-400 border-violet-400/20 mb-4">How it works</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Three steps to{' '}
+      <section className="relative py-28">
+        <div className="dot-pattern pointer-events-none absolute inset-0 opacity-25" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div {...fadeUp()} className="mb-16 text-center">
+            <Badge className="mb-4 border-violet-200 bg-violet-50 text-violet-700">
+              How it works
+            </Badge>
+            <h2 className="text-4xl font-bold text-stone-900 sm:text-5xl">
+              Three steps to{" "}
               <span className="text-gradient">zero-friction</span> coverage.
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6 relative">
-            {/* Connector line (desktop) */}
-            <div className="absolute top-12 left-1/4 right-1/4 h-px bg-gradient-to-r from-cyan-400/20 via-violet-400/20 to-emerald-400/20 hidden md:block" />
+          <div className="relative grid gap-6 md:grid-cols-3">
+            <div className="absolute left-1/4 right-1/4 top-12 hidden h-px bg-gradient-to-r from-sky-200 via-violet-200 to-emerald-200 md:block" />
 
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}
                 {...fadeUp(i * 0.15)}
-                className={`glass glass-hover rounded-2xl p-8 border ${step.border} relative group`}
+                className={`glass glass-hover relative overflow-hidden rounded-2xl border ${step.border} p-8`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${step.color} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-70`}
+                />
                 <div className="relative">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${step.color} border ${step.border} flex items-center justify-center`}>
-                      <step.icon className={`w-5 h-5 ${step.iconColor}`} />
+                  <div className="mb-6 flex items-start justify-between">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl border ${step.border} bg-white shadow-sm`}
+                    >
+                      <step.icon className={`h-5 w-5 ${step.iconColor}`} />
                     </div>
-                    <span className="text-4xl font-bold text-white/5" style={{ fontFamily: 'Syne, sans-serif' }}>
+                    <span className="text-4xl font-bold text-stone-200">
                       {step.number}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  <h3 className="mb-3 text-xl font-bold text-stone-900">
                     {step.title}
                   </h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
+                  <p className="text-sm leading-relaxed text-stone-600">
+                    {step.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -387,47 +445,57 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Products / Coming soon ── */}
       <section className="py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <Badge className="bg-amber-400/10 text-amber-400 border-amber-400/20 mb-4">Product Suite</Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-              One protocol,{' '}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div {...fadeUp()} className="mb-16 text-center">
+            <Badge className="mb-4 border-amber-200 bg-amber-50 text-amber-700">
+              Product Suite
+            </Badge>
+            <h2 className="mb-4 text-4xl font-bold text-stone-900 sm:text-5xl">
+              One protocol,{" "}
               <span className="text-gradient">infinite triggers.</span>
             </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">
+            <p className="mx-auto max-w-xl text-stone-600">
               Any real-world data point can become an insurance trigger.
-              We're starting with flight delay — and expanding fast.
+              We&apos;re starting with flight delay and expanding fast.
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {products.map((product, i) => (
               <motion.div
                 key={product.title}
                 {...fadeUp(i * 0.1)}
-                className="glass glass-hover rounded-2xl p-6 group relative overflow-hidden"
+                className="glass glass-hover relative overflow-hidden rounded-2xl border border-stone-200 p-6"
               >
-                {product.status === 'live' && (
-                  <div className="absolute inset-0 bg-cyan-400/3 rounded-2xl" />
+                {product.status === "live" && (
+                  <div className="absolute inset-0 rounded-2xl bg-sky-100/40" />
                 )}
                 <div className="relative">
-                  <product.icon className={`w-8 h-8 mb-4 ${
-                    product.color === 'cyan' ? 'text-cyan-400' :
-                    product.color === 'emerald' ? 'text-emerald-400' :
-                    product.color === 'violet' ? 'text-violet-400' :
-                    'text-amber-400'
-                  }`} />
-                  <h3 className="font-bold text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  <product.icon
+                    className={`mb-4 h-8 w-8 ${
+                      product.color === "cyan"
+                        ? "text-sky-700"
+                        : product.color === "emerald"
+                          ? "text-emerald-700"
+                          : product.color === "violet"
+                            ? "text-violet-700"
+                            : "text-amber-700"
+                    }`}
+                  />
+                  <h3 className="mb-2 font-bold text-stone-900">
                     {product.title}
                   </h3>
-                  <p className="text-zinc-500 text-sm mb-4 leading-relaxed">{product.desc}</p>
-                  <Badge className={
-                    product.status === 'live'
-                      ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs'
-                      : 'bg-zinc-800 text-zinc-500 border-zinc-700 text-xs'
-                  }>
+                  <p className="mb-4 text-sm leading-relaxed text-stone-600">
+                    {product.desc}
+                  </p>
+                  <Badge
+                    className={
+                      product.status === "live"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 text-xs"
+                        : "border-stone-200 bg-stone-100 text-stone-500 text-xs"
+                    }
+                  >
                     {product.statusLabel}
                   </Badge>
                 </div>
@@ -437,26 +505,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
-      <section className="py-28 border-y border-white/5 bg-white/[0.01]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <h2 className="text-4xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
+      <section className="border-y border-stone-200 bg-white/70 py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.div {...fadeUp()} className="mb-16 text-center">
+            <h2 className="text-4xl font-bold text-stone-900">
               Early testers love it.
             </h2>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {testimonials.map((t, i) => (
-              <motion.div key={t.author} {...fadeUp(i * 0.1)} className="glass rounded-2xl p-6">
-                <div className="flex gap-0.5 mb-4">
+              <motion.div
+                key={t.author}
+                {...fadeUp(i * 0.1)}
+                className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
+              >
+                <div className="mb-4 flex gap-0.5">
                   {[...Array(t.stars)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <Star
+                      key={j}
+                      className="h-4 w-4 fill-amber-400 text-amber-400"
+                    />
                   ))}
                 </div>
-                <p className="text-zinc-300 text-sm leading-relaxed mb-5">"{t.quote}"</p>
+                <p className="mb-5 text-sm leading-relaxed text-stone-600">
+                  "{t.quote}"
+                </p>
                 <div>
-                  <p className="font-semibold text-white text-sm">{t.author}</p>
-                  <p className="text-zinc-500 text-xs">{t.role}</p>
+                  <p className="text-sm font-semibold text-stone-900">
+                    {t.author}
+                  </p>
+                  <p className="text-xs text-stone-500">{t.role}</p>
                 </div>
               </motion.div>
             ))}
@@ -464,31 +542,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="py-32 relative">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[500px] h-[300px] bg-cyan-400/5 rounded-full blur-[80px]" />
+      <section className="relative py-32">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-[300px] w-[500px] rounded-full bg-sky-200/30 blur-[80px]" />
         </div>
-        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
           <motion.div {...fadeUp()}>
-            <h2 className="text-5xl sm:text-6xl font-bold mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Your next delayed flight{' '}
+            <h2 className="mb-6 text-5xl font-bold text-stone-900 sm:text-6xl">
+              Your next delayed flight{" "}
               <span className="text-gradient">pays you back.</span>
             </h2>
-            <p className="text-zinc-400 text-lg mb-10">
+            <p className="mb-10 text-lg text-stone-600">
               Connect your Algorand wallet and get covered in under 60 seconds.
             </p>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap justify-center gap-3">
               <Link href="/app">
-                <Button size="lg" className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold gap-2 glow-cyan px-8 py-6 text-base">
-                  <Zap className="w-5 h-5" />
+                <Button
+                  size="lg"
+                  className="gap-2 bg-slate-900 px-8 py-6 text-base font-bold text-white shadow-[0_10px_24px_rgba(15,23,42,0.22)] hover:bg-slate-800"
+                >
+                  <Zap className="h-5 w-5" />
                   Get Insured Now
                 </Button>
               </Link>
               <Link href="/explore">
-                <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 text-zinc-300 px-8 py-6 text-base gap-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 border-stone-300 px-8 py-6 text-base text-stone-700 hover:bg-stone-100"
+                >
                   Explore Products
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -496,47 +580,71 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/5 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <footer className="border-t border-stone-200 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
-              { title: 'Product', links: ['Get Insured', 'Dashboard', 'Explore', 'Pricing'] },
-              { title: 'Developers', links: ['Documentation', 'Smart Contract', 'Oracle API', 'GitHub'] },
-              { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
-              { title: 'Legal', links: ['Privacy', 'Terms', 'Disclosures', 'Security'] },
-            ].map(col => (
+              {
+                title: "Product",
+                links: ["Get Insured", "Dashboard", "Explore", "Pricing"],
+              },
+              {
+                title: "Developers",
+                links: [
+                  "Documentation",
+                  "Smart Contract",
+                  "Oracle API",
+                  "GitHub",
+                ],
+              },
+              {
+                title: "Company",
+                links: ["About", "Blog", "Careers", "Contact"],
+              },
+              {
+                title: "Legal",
+                links: ["Privacy", "Terms", "Disclosures", "Security"],
+              },
+            ].map((col) => (
               <div key={col.title}>
-                <p className="text-xs uppercase tracking-widest text-zinc-600 mb-4">{col.title}</p>
+                <p className="mb-4 text-xs uppercase tracking-[0.28em] text-stone-500">
+                  {col.title}
+                </p>
                 <ul className="space-y-2.5">
-                  {col.links.map(link => (
+                  {col.links.map((link) => (
                     <li key={link}>
-                      <a href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">{link}</a>
+                      <a
+                        href="#"
+                        className="text-sm text-stone-500 transition-colors hover:text-stone-900"
+                      >
+                        {link}
+                      </a>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-white/5 gap-4">
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-8 text-center sm:flex-row sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-md flex items-center justify-center">
-                <Shield className="w-3 h-3 text-black" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-sky-500 to-cyan-400">
+                <Shield className="h-3 w-3 text-white" />
               </div>
-              <span className="font-bold text-sm" style={{ fontFamily: 'Syne, sans-serif' }}>
-                Aero<span className="text-cyan-400">Shield</span>
+              <span className="text-sm font-bold text-stone-900">
+                Aero<span className="text-sky-700">Shield</span>
               </span>
             </div>
-            <p className="text-xs text-zinc-600">
-              © 2026 AeroShield · Built by Team Chain Reaction · AlgoBharat Hack Series 3.0
+            <p className="text-xs text-stone-500">
+              © 2026 AeroShield · Built by Team Chain Reaction · AlgoBharat Hack
+              Series 3.0
             </p>
-            <div className="flex items-center gap-2 text-xs text-zinc-600">
-              <div className="status-dot w-1.5 h-1.5" />
+            <div className="flex items-center gap-2 text-xs text-stone-500">
+              <div className="status-dot h-1.5 w-1.5" />
               Algorand TestNet
             </div>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
