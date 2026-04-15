@@ -230,7 +230,6 @@ function buildSummary(
 
 export default function AppPage() {
   const { activeAccount, wallets, signTransactions } = useWallet();
-  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
   const [isHydrated, setIsHydrated] = useState(false);
   const [productId, setProductId] = useState<InsuranceType>("flight");
   const [step, setStep] = useState<FlowStep>("form");
@@ -323,10 +322,7 @@ export default function AppPage() {
   }
 
   async function handleConnect() {
-    const preferredOrder =
-      connectMode === "walletconnect-first"
-        ? ["walletconnect", "pera", "defly"]
-        : ["pera", "defly", "walletconnect"];
+    const preferredOrder = ["pera", "defly", "walletconnect"];
 
     for (const walletId of preferredOrder) {
       const result = await tryConnect(walletId);

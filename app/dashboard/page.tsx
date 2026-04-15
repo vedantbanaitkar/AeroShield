@@ -183,7 +183,6 @@ function StatusBadge({ status }: { status: DashboardStatus }) {
 
 export default function DashboardPage() {
   const { activeAccount, wallets } = useWallet();
-  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
   const [policies, setPolicies] = useState<PolicyRecord[]>([]);
   const [isLoadingPolicies, setIsLoadingPolicies] = useState(false);
 
@@ -214,10 +213,7 @@ export default function DashboardPage() {
   }
 
   async function handleConnect() {
-    const preferredOrder =
-      connectMode === "walletconnect-first"
-        ? ["walletconnect", "pera", "defly"]
-        : ["pera", "defly", "walletconnect"];
+    const preferredOrder = ["pera", "defly", "walletconnect"];
 
     for (const walletId of preferredOrder) {
       const result = await tryConnect(walletId);

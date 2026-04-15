@@ -30,7 +30,6 @@ export function Navbar() {
   const pathname = usePathname();
   const { activeAccount, wallets } = useWallet();
   const { theme, toggleTheme } = useTheme();
-  const connectMode = process.env.NEXT_PUBLIC_CONNECT_MODE ?? "pera-first";
   const [isHydrated, setIsHydrated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -77,10 +76,7 @@ export function Navbar() {
   }
 
   async function handleConnect() {
-    const preferredOrder =
-      connectMode === "walletconnect-first"
-        ? ["walletconnect", "pera", "defly"]
-        : ["pera", "defly", "walletconnect"];
+    const preferredOrder = ["pera", "defly", "walletconnect"];
 
     for (const walletId of preferredOrder) {
       const result = await tryConnect(walletId);
