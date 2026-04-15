@@ -23,16 +23,7 @@ const manager = new WalletManager({
           url: dappUrl,
           icons: [],
         },
-        // Explicitly configure that we only support Algorand TestNet
-        optionalNamespaces: {
-          // This tells WalletConnect we can use Algorand TestNet
-          algorand: {
-            chains: ["algorand:SGO1GKSzyE7IEPItTxbbwYMIHB8QWcsbP1mHJ2PqA53w="], // Algorand TestNet
-            methods: ["algo_signTxn"],
-            events: ["network_changed"],
-          },
-        },
-      } as any,
+      },
     },
   ],
   defaultNetwork: NetworkId.TESTNET,
