@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useWallet, NetworkId } from "@txnlab/use-wallet-react";
+import { useWallet } from "@txnlab/use-wallet-react";
 import { Shield, Menu, X, ChevronRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,8 +49,7 @@ export function Navbar() {
     for (const walletId of preferredOrder) {
       const wallet = wallets?.find((w) => w.id === walletId);
       if (wallet) {
-        // Pass network configuration to ensure mobile wallet connects to correct network
-        wallet.connect({ network: NetworkId.TESTNET });
+        wallet.connect();
         return;
       }
     }
