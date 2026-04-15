@@ -28,9 +28,15 @@ When the dApp requests a TestNet connection and your Pera wallet has no TestNet 
 5. Complete account creation
 6. Back up seed phrase if needed
 
+**Alternative: Toggle Network in Developer Settings**
+- If you prefer, you can use one account and toggle between TestNet/MainNet in Pera Settings → Developer Settings
+- ⚠️ **Risk**: Easy to forget to toggle, causing "network mismatch" errors
+- ✅ **Recommended**: Create a permanent TestNet account instead
+
 **Step 2: Verify Account Exists**
 1. In Pera account list, you should now see a TestNet account
 2. It should show the network label (TestNet)
+3. If using toggle method: Ensure Developer Settings is set to TestNet
 
 **Step 3: Test Connection**
 1. On your computer: Open `http://localhost:3000`
@@ -71,6 +77,26 @@ Pera checks: "Do I have TestNet accounts?"
 1. **Removed unsupported WalletConnect namespace config**: The `optionalNamespaces` configuration wasn't working and was removed
 2. **Simplified to basics**: Now uses only `defaultNetwork: NetworkId.TESTNET` in WalletManager
 3. **Configuration via env vars**: Network and wallet mode now controlled by environment variables
+
+## Important: TestNet Account Setup Methods
+
+### Method A: Permanent TestNet Account (RECOMMENDED) ✅
+- Create a **separate account dedicated to TestNet**
+- This account exists only on TestNet
+- No toggling needed
+- **Best for**: Production testing, avoiding accidental MainNet connections
+- **Steps**: 
+  1. Toggle to TestNet in Pera Settings → Developer Settings
+  2. Create new account → it will be on TestNet
+  3. You now have permanent TestNet account
+
+### Method B: Toggle Network in Developer Settings ⚠️
+- Use **one account** that can switch between TestNet and MainNet
+- Toggle in Pera Settings → Developer Settings → Network
+- **Risk**: Easy to forget to toggle, causing "network mismatch" errors
+- **Not recommended for**: Production use
+
+**Current Status**: If you toggled to TestNet in developer settings and connection works, make sure to create a permanent TestNet account for reliability.
 
 ## Recommended Next Actions
 
