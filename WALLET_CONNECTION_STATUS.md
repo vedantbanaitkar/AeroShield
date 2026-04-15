@@ -126,6 +126,16 @@ Pera checks: "Do I have TestNet accounts?"
 Scan QR → Wait for prompt → Tap CONFIRM → Let complete → Success ✅
 ```
 
+**What the Approval Modal Looks Like**:
+- Shows "AeroShield — Parametric Insurance on Algorand wants to connect to your account"
+- Shows network selector with **TESTNET** highlighted
+- Lists your account (e.g., WNR4..CR3E)
+- Shows requested permissions:
+  - ✓ View your wallet address & balances
+  - ✓ Request transaction sign
+  - ✓ Request arbitrary data signature
+- **BLACK "Connect" BUTTON at bottom** - TAP THIS to approve
+
 ---
 
 ### Issue: Connection Works Locally but Production Shows Different Error
@@ -218,7 +228,10 @@ We can also explore if there's an issue with how use-wallet-react is handling Te
 - Mobile TestNet account automatically selected
 - No "Network mismatch" error with proper TestNet account
 - Both localhost and production-ready
+- **Pera approval modal appearing correctly** ✅
 
-**Next Options**:
-1. **Keep current setup**: Pera-first mode is reliable and working
-2. **Add WalletConnect**: Optional - requires whitelisting domain in WalletConnect Cloud (see below)
+**Connection Success Indicators**:
+- Pera shows the approval modal with TestNet selected
+- Your account is listed (WNR4..CR3E or similar)
+- Permissions are displayed correctly
+- **Next step**: Tap the black "Connect" button to finalize ⏳
