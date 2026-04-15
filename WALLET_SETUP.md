@@ -113,13 +113,13 @@ Your app is **correctly configured** for TestNet everywhere:
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| "Network mismatch" error | Use ngrok public URL instead of localhost |
-| Pera app won't open | Make sure you're on HTTPS (ngrok provides this) |
-| Connection hangs | Restart Pera app and try again |
-| "dApp connected to MainNet" | Check Pera app settings, switch to TestNet |
-| "Unknown error" | Clear browser cache and Pera app cache |
+| Problem                     | Solution                                        |
+| --------------------------- | ----------------------------------------------- |
+| "Network mismatch" error    | Use ngrok public URL instead of localhost       |
+| Pera app won't open         | Make sure you're on HTTPS (ngrok provides this) |
+| Connection hangs            | Restart Pera app and try again                  |
+| "dApp connected to MainNet" | Check Pera app settings, switch to TestNet      |
+| "Unknown error"             | Clear browser cache and Pera app cache          |
 
 ## Technical Details
 
@@ -131,7 +131,7 @@ Your app is **correctly configured** for TestNet everywhere:
 ## Need Help?
 
 If ngrok doesn't work or you prefer not to use it, let me know and we can:
+
 1. Deploy to Vercel (quick and free)
 2. Set up a local development domain (hosts file method)
 3. Use a different testing approach
-

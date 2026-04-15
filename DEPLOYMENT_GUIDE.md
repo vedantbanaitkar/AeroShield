@@ -9,6 +9,7 @@ This guide walks you through deploying AeroShield to a public HTTPS domain so yo
 ## Phase 1: GitHub Setup (5 minutes)
 
 ### Step 1.1: Create GitHub Repository
+
 1. Go to https://github.com/new
 2. Sign in with your GitHub account
 3. Fill in the form:
@@ -87,10 +88,12 @@ ORACLE_WALLET_MNEMONIC = behave trigger chest various three armor pledge gun spi
 ### Step 2.5: Test Your Deployment
 
 **On desktop browser:**
+
 1. Visit your Vercel URL: `https://aeroshield.vercel.app`
 2. Click "Connect Wallet" → Should work with Pera extension
 
 **On mobile phone:**
+
 1. Visit the same Vercel URL
 2. Click "Connect Wallet" → Pera recognizes TestNet automatically ✓
 3. No "Network mismatch" error!
@@ -102,6 +105,7 @@ ORACLE_WALLET_MNEMONIC = behave trigger chest various three armor pledge gun spi
 ### Step 3.1: Buy a Domain (Optional)
 
 Domain registrars:
+
 - **Namecheap:** https://www.namecheap.com (~$5-10/year)
 - **GoDaddy:** https://www.godaddy.com
 - **Google Domains:** https://domains.google
@@ -122,24 +126,26 @@ Your app will then be at: `https://yourdomain.com` ✓
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Build failed" | Check environment variables are correct, make sure all required ones are set |
-| Vercel can't find repo | Make sure GitHub repo is public and you're logged in with the right account |
-| Environment variables not loading | Vercel needs "Redeploy" after adding vars. Click **Redeploy** in dashboard |
-| Pera still shows network error | Clear browser cache, restart mobile Pera app, make sure you're visiting HTTPS URL |
-| Custom domain not working | Wait 10 minutes for DNS propagation, check Vercel domain settings |
+| Issue                             | Solution                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| "Build failed"                    | Check environment variables are correct, make sure all required ones are set      |
+| Vercel can't find repo            | Make sure GitHub repo is public and you're logged in with the right account       |
+| Environment variables not loading | Vercel needs "Redeploy" after adding vars. Click **Redeploy** in dashboard        |
+| Pera still shows network error    | Clear browser cache, restart mobile Pera app, make sure you're visiting HTTPS URL |
+| Custom domain not working         | Wait 10 minutes for DNS propagation, check Vercel domain settings                 |
 
 ---
 
 ## Next Steps After Deployment
 
 ✅ You now have:
+
 - **Public HTTPS domain** → Pera recognizes TestNet
 - **Production-ready app** → Ready for beta testing
 - **Automated deployments** → Push to GitHub → Auto-deploys to Vercel
 
 **When you're ready for smart contracts:**
+
 - Update `/app` page with actual policy purchase flow
 - Connect to smart contract endpoints
 - Deploy contract to TestNet
@@ -149,12 +155,12 @@ Your app will then be at: `https://yourdomain.com` ✓
 
 ## Quick Reference
 
-| Environment | URL | Status |
-|-------------|-----|--------|
-| **Local Dev** | http://localhost:3000 | Dev server (localhost issues) |
-| **ngrok Tunnel** | https://xxxx-xxxx.ngrok.io | Mobile testing (expires in 8 hours) |
-| **Vercel Free** | https://aeroshield.vercel.app | **Production TestNet** ✓ |
-| **Custom Domain** | https://yourdomain.com | Branded (optional) |
+| Environment       | URL                           | Status                              |
+| ----------------- | ----------------------------- | ----------------------------------- |
+| **Local Dev**     | http://localhost:3000         | Dev server (localhost issues)       |
+| **ngrok Tunnel**  | https://xxxx-xxxx.ngrok.io    | Mobile testing (expires in 8 hours) |
+| **Vercel Free**   | https://aeroshield.vercel.app | **Production TestNet** ✓            |
+| **Custom Domain** | https://yourdomain.com        | Branded (optional)                  |
 
 ---
 
