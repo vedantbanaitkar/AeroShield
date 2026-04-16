@@ -15,7 +15,14 @@ export function getOracleAccount() {
   if (!mnemonic) {
     throw new Error("Missing ORACLE_WALLET_MNEMONIC in environment variables");
   }
-  return algosdk.mnemonicToSecretKey(mnemonic);
+
+  try {
+    return algosdk.mnemonicToSecretKey(mnemonic.trim());
+  } catch {
+    throw new Error(
+      "Invalid ORACLE_WALLET_MNEMONIC. It must be a valid 25-word Algorand mnemonic.",
+    );
+  }
 }
 
 export function getAppId() {

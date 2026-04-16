@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import type { PolicyRecord } from "@/lib/policies";
 
+const ALGO_SCALE = 1_000_000;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -25,8 +27,8 @@ export async function POST(request: NextRequest) {
       productId: record.productId as any,
       productLabel: record.productId,
       flightNumber: "",
-      coverage: record.coverage,
-      premium: record.premium,
+      coverage: record.coverage / ALGO_SCALE,
+      premium: record.premium / ALGO_SCALE,
       appId: 1000,
       premiumPaymentTxId: record.id,
       createdAt: record.createdAt.toISOString(),

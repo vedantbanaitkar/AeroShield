@@ -1,6 +1,7 @@
 import { Contract } from "@algorandfoundation/algorand-typescript";
 import {
   Account,
+  bytes,
   uint64,
   GlobalState,
   Txn,
@@ -11,6 +12,7 @@ import {
   itxn,
 } from "@algorandfoundation/algorand-typescript";
 
+// v2.0 - Fixed oracle initialization
 export class HelloWorld extends Contract {
   oracle = GlobalState<Account>();
 
@@ -37,7 +39,7 @@ export class HelloWorld extends Contract {
   // Oracle-only payout trigger
   @abimethod({ allowActions: ["NoOp"] })
   triggerPayout(
-    beneficiary: Account,
+    beneficiary: bytes<32>,
     coverageAmount: uint64,
     flightNumber: string,
   ): void {

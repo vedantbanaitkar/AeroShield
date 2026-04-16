@@ -191,7 +191,12 @@ class DbPolicyRepository implements PolicyRepository {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
-      if (!response.ok) throw new Error("Failed to create policy");
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const message =
+          payload?.error ?? `Failed to create policy (HTTP ${response.status})`;
+        throw new Error(message);
+      }
       const data = await response.json();
       return data.policy;
     } catch (error) {

@@ -3,7 +3,7 @@
   "sources": [
     "../../hello_world/contract.algo.ts"
   ],
-  "mappings": ";;;;;;;;;;;;;;;;AAGA;;AAAA;AAAA;AAAA;;AAAA;;;AAAA;;;;;;;;;;;;AAAA;;;AAAA;;;;;;AAAA;AAAA;;;;;;AAAA;;;AAAA;;;;AAAA;AAGG;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAFD;AAIE;AAAA;AAFD;AAAA;AAMA;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAOQ;;AAAA;;AAAsB;;AAAtB;AAAP;AACO;;AAAA;;AAAwB;;AAAxB;AAAP;AACO;;AAAA;;AAAP;AACA;AAAA;AACyB;;AAAlB;AAXR;AAeA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;AAAA;AAMQ;;AAAe;AA7BxB;AA6BwB;AAAA;AAAf;AAAP;AACA;AAAA;AAEA;;;;;AAAA;;;AAGO;;;AAHP;AATD;AAAA",
+  "mappings": ";;;;;;;;;;;;;;;;AAeA;;AAAA;AAAA;AAAA;;AAAA;;;AAAA;;;;;;;;;;;;AAAA;;;AAAA;;;;;;AAAA;AAAA;;;;;;AAAA;;;AAAA;;;;AAAA;AAGG;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAFD;AAIE;AAAA;AAFD;AAAA;AAMA;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAOQ;;AAAA;;AAAsB;;AAAtB;AAAP;AACO;;AAAA;;AAAwB;;AAAxB;AAAP;AACO;;AAAA;;AAAP;AACA;AAAA;AACyB;;AAAlB;AAXR;AAeA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;AAAA;AAMQ;;AAAe;AA7BxB;AA6BwB;AAAA;AAAf;AAAP;AACA;AAAA;AAEA;;;;;AAAA;;;AAIS;;;AAJT;AATD;AAAA",
   "op_pc_offset": 0,
   "pc_events": {
     "1": {
@@ -53,26 +53,26 @@
       "stack_out": []
     },
     "25": {
-      "op": "pushbytess 0x473f4740 0x962a003a // method \"buyPolicy(pay,string,uint64,uint64)void\", method \"triggerPayout(address,uint64,string)void\"",
+      "op": "pushbytess 0x473f4740 0x44708227 // method \"buyPolicy(pay,string,uint64,uint64)void\", method \"triggerPayout(byte[32],uint64,string)void\"",
       "defined_out": [
         "Method(buyPolicy(pay,string,uint64,uint64)void)",
-        "Method(triggerPayout(address,uint64,string)void)"
+        "Method(triggerPayout(byte[32],uint64,string)void)"
       ],
       "stack_out": [
         "Method(buyPolicy(pay,string,uint64,uint64)void)",
-        "Method(triggerPayout(address,uint64,string)void)"
+        "Method(triggerPayout(byte[32],uint64,string)void)"
       ]
     },
     "37": {
       "op": "txna ApplicationArgs 0",
       "defined_out": [
         "Method(buyPolicy(pay,string,uint64,uint64)void)",
-        "Method(triggerPayout(address,uint64,string)void)",
+        "Method(triggerPayout(byte[32],uint64,string)void)",
         "tmp%4#0"
       ],
       "stack_out": [
         "Method(buyPolicy(pay,string,uint64,uint64)void)",
-        "Method(triggerPayout(address,uint64,string)void)",
+        "Method(triggerPayout(byte[32],uint64,string)void)",
         "tmp%4#0"
       ]
     },

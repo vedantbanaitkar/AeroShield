@@ -76,7 +76,7 @@ export function Navbar() {
   }
 
   async function handleConnect() {
-    const preferredOrder = ["pera", "defly", "walletconnect"];
+    const preferredOrder = ["pera"];
 
     for (const walletId of preferredOrder) {
       const result = await tryConnect(walletId);
@@ -88,9 +88,7 @@ export function Navbar() {
       }
     }
 
-    const fallback = wallets?.[0];
-    if (!fallback) return;
-    await tryConnect(fallback.id);
+    console.error("Pera Wallet could not connect.");
   }
   function handleDisconnect() {
     wallets?.find((w) => w.isActive)?.disconnect();

@@ -5,20 +5,20 @@
 main:
     intcblock 1 0 8 32
     bytecblock "oracle"
-    // smart_contracts/hello_world/contract.algo.ts:4
+    // smart_contracts/hello_world/contract.algo.ts:16
     // export class HelloWorld extends Contract {
     txn OnCompletion
     !
     assert // OnCompletion must be NoOp
     txn ApplicationID
     bz main_create_NoOp@6
-    pushbytess 0x473f4740 0x962a003a // method "buyPolicy(pay,string,uint64,uint64)void", method "triggerPayout(address,uint64,string)void"
+    pushbytess 0x473f4740 0x44708227 // method "buyPolicy(pay,string,uint64,uint64)void", method "triggerPayout(byte[32],uint64,string)void"
     txna ApplicationArgs 0
     match buyPolicy triggerPayout
     err
 
 main_create_NoOp@6:
-    // smart_contracts/hello_world/contract.algo.ts:4
+    // smart_contracts/hello_world/contract.algo.ts:16
     // export class HelloWorld extends Contract {
     pushbytes 0xd324bea4 // method "createApplication(address)void"
     txna ApplicationArgs 0
@@ -28,31 +28,31 @@ main_create_NoOp@6:
 
 // smart_contracts/hello_world/contract.algo.ts::HelloWorld.createApplication[routing]() -> void:
 createApplication:
-    // smart_contracts/hello_world/contract.algo.ts:7
-    // @abimethod({ onCreate: 'require' })
+    // smart_contracts/hello_world/contract.algo.ts:19
+    // @abimethod({ onCreate: "require" })
     txna ApplicationArgs 1
     dup
     len
     intc_3 // 32
     ==
     assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
-    // smart_contracts/hello_world/contract.algo.ts:5
-    // oracle = GlobalState<Account>()
+    // smart_contracts/hello_world/contract.algo.ts:17
+    // oracle = GlobalState<Account>();
     bytec_0 // "oracle"
-    // smart_contracts/hello_world/contract.algo.ts:9
-    // this.oracle.value = oracleAddr
+    // smart_contracts/hello_world/contract.algo.ts:21
+    // this.oracle.value = oracleAddr;
     swap
     app_global_put
-    // smart_contracts/hello_world/contract.algo.ts:7
-    // @abimethod({ onCreate: 'require' })
+    // smart_contracts/hello_world/contract.algo.ts:19
+    // @abimethod({ onCreate: "require" })
     intc_0 // 1
     return
 
 
 // smart_contracts/hello_world/contract.algo.ts::HelloWorld.buyPolicy[routing]() -> void:
 buyPolicy:
-    // smart_contracts/hello_world/contract.algo.ts:13
-    // @abimethod({ allowActions: ['NoOp'] })
+    // smart_contracts/hello_world/contract.algo.ts:25
+    // @abimethod({ allowActions: ["NoOp"] })
     txn GroupIndex
     intc_0 // 1
     -
@@ -85,42 +85,42 @@ buyPolicy:
     ==
     assert // invalid number of bytes for arc4.uint64
     btoi
-    // smart_contracts/hello_world/contract.algo.ts:20
-    // assert(paymentTxn.sender === Txn.sender)
+    // smart_contracts/hello_world/contract.algo.ts:32
+    // assert(paymentTxn.sender === Txn.sender);
     dig 2
     gtxns Sender
     txn Sender
     ==
     assert
-    // smart_contracts/hello_world/contract.algo.ts:21
-    // assert(paymentTxn.receiver === Global.currentApplicationAddress)
+    // smart_contracts/hello_world/contract.algo.ts:33
+    // assert(paymentTxn.receiver === Global.currentApplicationAddress);
     dig 2
     gtxns Receiver
     global CurrentApplicationAddress
     ==
     assert
-    // smart_contracts/hello_world/contract.algo.ts:22
-    // assert(paymentTxn.amount > 0)
+    // smart_contracts/hello_world/contract.algo.ts:34
+    // assert(paymentTxn.amount > 0);
     uncover 2
     gtxns Amount
     assert
-    // smart_contracts/hello_world/contract.algo.ts:23
-    // assert(coverageAmount > 0)
+    // smart_contracts/hello_world/contract.algo.ts:35
+    // assert(coverageAmount > 0);
     swap
     assert
-    // smart_contracts/hello_world/contract.algo.ts:24
-    // assert(delayThreshold >= 60)
+    // smart_contracts/hello_world/contract.algo.ts:36
+    // assert(delayThreshold >= 60);
     pushint 60 // 60
     >=
-    // smart_contracts/hello_world/contract.algo.ts:13
-    // @abimethod({ allowActions: ['NoOp'] })
+    // smart_contracts/hello_world/contract.algo.ts:25
+    // @abimethod({ allowActions: ["NoOp"] })
     return
 
 
 // smart_contracts/hello_world/contract.algo.ts::HelloWorld.triggerPayout[routing]() -> void:
 triggerPayout:
-    // smart_contracts/hello_world/contract.algo.ts:28
-    // @abimethod({ allowActions: ['NoOp'] })
+    // smart_contracts/hello_world/contract.algo.ts:40
+    // @abimethod({ allowActions: ["NoOp"] })
     txna ApplicationArgs 1
     dup
     len
@@ -144,46 +144,57 @@ triggerPayout:
     len
     ==
     assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
-    // smart_contracts/hello_world/contract.algo.ts:34
-    // assert(Txn.sender === this.oracle.value)
+    // smart_contracts/hello_world/contract.algo.ts:46
+    // assert(Txn.sender === this.oracle.value);
     txn Sender
     intc_1 // 0
-    // smart_contracts/hello_world/contract.algo.ts:5
-    // oracle = GlobalState<Account>()
+    // smart_contracts/hello_world/contract.algo.ts:17
+    // oracle = GlobalState<Account>();
     bytec_0 // "oracle"
-    // smart_contracts/hello_world/contract.algo.ts:34
-    // assert(Txn.sender === this.oracle.value)
+    // smart_contracts/hello_world/contract.algo.ts:46
+    // assert(Txn.sender === this.oracle.value);
     app_global_get_ex
     assert // check GlobalState exists
     ==
     assert
-    // smart_contracts/hello_world/contract.algo.ts:35
-    // assert(coverageAmount > 0)
+    // smart_contracts/hello_world/contract.algo.ts:47
+    // assert(coverageAmount > 0);
     dup
     assert
-    // smart_contracts/hello_world/contract.algo.ts:37-41
-    // itxn.payment({
-    //   receiver: beneficiary,
-    //   amount: coverageAmount,
-    //   fee: 0,
-    // }).submit()
+    // smart_contracts/hello_world/contract.algo.ts:49-55
+    // itxn
+    //   .payment({
+    //     receiver: beneficiary,
+    //     amount: coverageAmount,
+    //     fee: 0,
+    //   })
+    //   .submit();
     itxn_begin
     itxn_field Amount
     itxn_field Receiver
+    // smart_contracts/hello_world/contract.algo.ts:49-54
+    // itxn
+    //   .payment({
+    //     receiver: beneficiary,
+    //     amount: coverageAmount,
+    //     fee: 0,
+    //   })
     intc_0 // 1
     itxn_field TypeEnum
-    // smart_contracts/hello_world/contract.algo.ts:40
+    // smart_contracts/hello_world/contract.algo.ts:53
     // fee: 0,
     intc_1 // 0
     itxn_field Fee
-    // smart_contracts/hello_world/contract.algo.ts:37-41
-    // itxn.payment({
-    //   receiver: beneficiary,
-    //   amount: coverageAmount,
-    //   fee: 0,
-    // }).submit()
+    // smart_contracts/hello_world/contract.algo.ts:49-55
+    // itxn
+    //   .payment({
+    //     receiver: beneficiary,
+    //     amount: coverageAmount,
+    //     fee: 0,
+    //   })
+    //   .submit();
     itxn_submit
-    // smart_contracts/hello_world/contract.algo.ts:28
-    // @abimethod({ allowActions: ['NoOp'] })
+    // smart_contracts/hello_world/contract.algo.ts:40
+    // @abimethod({ allowActions: ["NoOp"] })
     intc_0 // 1
     return

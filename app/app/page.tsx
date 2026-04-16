@@ -40,6 +40,7 @@ type FlightDelayThreshold = 90 | 120 | 180;
 
 interface Policy {
   policyRecordId?: string;
+  persistenceWarning?: string;
   productId: InsuranceType;
   productLabel: string;
   flightNumber: string;
@@ -59,6 +60,7 @@ interface Policy {
   txId?: string;
   delayMinutes?: number;
   payoutTxId?: string;
+  payoutDemoMode?: boolean;
   balanceBeforePurchase?: number;
   balanceAfterPurchase?: number;
   balanceAfterPayout?: number;
@@ -322,7 +324,7 @@ export default function AppPage() {
   }
 
   async function handleConnect() {
-    const preferredOrder = ["pera", "defly", "walletconnect"];
+    const preferredOrder = ["pera"];
 
     for (const walletId of preferredOrder) {
       const result = await tryConnect(walletId);
@@ -334,12 +336,14 @@ export default function AppPage() {
       }
     }
 
-    const fallback = wallets?.[0];
-    if (!fallback) return;
-    await tryConnect(fallback.id);
+    setErrorMsg(
+      "Pera Wallet could not connect. Install or reopen Pera Wallet, then try again.",
+    );
+    setStep("error");
   }
 
   const showConnectedWallet = isHydrated && !!activeAccount;
+  const isWalletReady = isHydrated && !!activeAccount;
 
   async function handleBuyPolicy() {
     if (!activeAccount) return;
@@ -452,28 +456,54 @@ export default function AppPage() {
         balanceBeforePurchase: balanceBefore,
         balanceAfterPurchase: balanceAfter,
       };
-      const storedPolicy = await policyRepository.create({
-        walletAddress: activeAccount.address,
-        productId,
-        productLabel: selectedProduct.title,
-        flightNumber,
-        routeFrom,
-        routeTo,
-        region,
-        cropType,
-        delayThreshold,
-        coverage,
-        premium,
-        appId: APP_ID,
-        premiumPaymentTxId: paymentTxId,
-        appCallTxId,
-      });
+      let storedPolicyId: string | undefined;
+      let persistenceWarning: string | undefined;
 
-      setPolicy({ ...newPolicy, policyRecordId: storedPolicy.id });
+      try {
+        const storedPolicy = await policyRepository.create({
+          walletAddress: activeAccount.address,
+          productId,
+          productLabel: selectedProduct.title,
+          flightNumber,
+          routeFrom,
+          routeTo,
+          region,
+          cropType,
+          delayThreshold,
+          coverage,
+          premium,
+          appId: APP_ID,
+          premiumPaymentTxId: paymentTxId,
+          appCallTxId,
+        });
+        storedPolicyId = storedPolicy.id;
+      } catch (persistError: any) {
+        const msg =
+          persistError?.message ?? "Unable to persist policy record to DB";
+        persistenceWarning =
+          "Policy was purchased on-chain, but database save failed. Dashboard history may not update until DB connectivity is restored.";
+        console.warn("Policy DB persistence failed after successful buy:", msg);
+      }
+
+      setPolicy({
+        ...newPolicy,
+        policyRecordId: storedPolicyId,
+        persistenceWarning,
+      });
       setWalletBalance(balanceAfter);
       setStep("monitoring");
     } catch (e: any) {
-      setErrorMsg(e.message ?? "Transaction failed");
+      const rawMessage = e?.message ?? "Transaction failed";
+      const isAppIdMismatch =
+        /ApplicationArgs 0|logic eval error|err opcode executed/i.test(
+          rawMessage,
+        );
+
+      setErrorMsg(
+        isAppIdMismatch
+          ? "Contract call failed. This usually means NEXT_PUBLIC_APP_ID on this deployment points to a different app than the deployed ABI. Update APP_ID and redeploy."
+          : rawMessage,
+      );
       setStep("error");
     }
   }
@@ -543,9 +573,17 @@ export default function AppPage() {
               ? policy.flightNumber
               : `${policy.productLabel}:${policy.routeFrom ?? "N/A"}`,
           appId: APP_ID,
+          demoMode: mockDelay,
         }),
       });
       const data = await res.json();
+      const isDemoModePayout = Boolean(data?.demoMode);
+
+      if (!res.ok || !data?.txId) {
+        throw new Error(
+          data?.error ?? `Trigger payout failed (HTTP ${res.status})`,
+        );
+      }
 
       // Capture balance after payout
       const algodClient = new algosdk.Algodv2(
@@ -563,6 +601,7 @@ export default function AppPage() {
       setPolicy((prev) => ({
         ...prev!,
         payoutTxId: data.txId,
+        payoutDemoMode: isDemoModePayout,
         delayMinutes,
         balanceAfterPayout: balanceAfter,
       }));
@@ -608,6 +647,29 @@ export default function AppPage() {
             Connect your wallet, pick a flight, choose your coverage. That's it.
           </p>
         </motion.div>
+
+        <AnimatePresence>
+          {errorMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mb-8 rounded-2xl border border-red-400/20 bg-red-500/10 px-5 py-4 text-left text-red-50 shadow-lg shadow-red-950/10"
+              role="alert"
+              aria-live="polite"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">Payout error</p>
+                  <p className="mt-1 wrap-break-word text-sm text-red-100/90">
+                    {errorMsg}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid md:grid-cols-5 gap-6">
           {/* ── Main form / flow panel ── */}
@@ -737,7 +799,7 @@ export default function AppPage() {
                             }
                             placeholder="e.g. AI302, 6E204"
                             className="pl-10 bg-white/8 border-white/15 focus:border-cyan-400/60 text-slate-900 font-mono placeholder:text-slate-500"
-                            disabled={!activeAccount}
+                            disabled={!isWalletReady}
                           />
                         </div>
                         <p className="text-xs text-slate-600">
@@ -757,7 +819,7 @@ export default function AppPage() {
                                 key={threshold}
                                 type="button"
                                 onClick={() => setDelayThreshold(threshold)}
-                                disabled={!activeAccount}
+                                disabled={!isWalletReady}
                                 className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
                                   delayThreshold === threshold
                                     ? "bg-cyan-400 text-black glow-cyan"
@@ -787,7 +849,7 @@ export default function AppPage() {
                           onChange={(e) => setRegion(e.target.value)}
                           placeholder="e.g. Coastal Karnataka"
                           className="bg-white/8 border-white/15 focus:border-emerald-400/60 text-slate-900 placeholder:text-slate-500"
-                          disabled={!activeAccount}
+                          disabled={!isWalletReady}
                         />
                         <p className="text-xs text-slate-600">
                           Location-based weather risk drives the premium
@@ -804,7 +866,7 @@ export default function AppPage() {
                               key={item}
                               type="button"
                               onClick={() => setCropType(item)}
-                              disabled={!activeAccount}
+                              disabled={!isWalletReady}
                               className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
                                 cropType === item
                                   ? "bg-emerald-400 text-black glow-cyan"
@@ -836,7 +898,7 @@ export default function AppPage() {
                             }
                             placeholder="BOM"
                             className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500 font-mono"
-                            disabled={!activeAccount}
+                            disabled={!isWalletReady}
                           />
                         </div>
                         <div className="space-y-2">
@@ -850,7 +912,7 @@ export default function AppPage() {
                             }
                             placeholder="DEL"
                             className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500 font-mono"
-                            disabled={!activeAccount}
+                            disabled={!isWalletReady}
                           />
                         </div>
                       </div>
@@ -865,7 +927,7 @@ export default function AppPage() {
                           onChange={(e) => setCargoValue(e.target.value)}
                           placeholder="5000"
                           className="bg-white/8 border-white/15 focus:border-violet-400/60 text-slate-900 placeholder:text-slate-500"
-                          disabled={!activeAccount}
+                          disabled={!isWalletReady}
                         />
                         <p className="text-xs text-slate-600">
                           Higher cargo value increases the premium automatically
@@ -884,7 +946,7 @@ export default function AppPage() {
                         <button
                           key={opt}
                           onClick={() => setCoverage(opt)}
-                          disabled={!activeAccount}
+                          disabled={!isWalletReady}
                           className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
                             coverage === opt
                               ? "bg-cyan-400 text-black glow-cyan"
@@ -929,7 +991,7 @@ export default function AppPage() {
                     onClick={() => setStep("confirm")}
                     disabled={
                       !selectedProduct.isOnChainReady ||
-                      !activeAccount ||
+                      !isWalletReady ||
                       !APP_ID ||
                       (productId === "flight" && !flightNumber) ||
                       (productId === "weather" && !region) ||
@@ -1151,6 +1213,27 @@ export default function AppPage() {
                     App ID: <span className="font-mono">{policy.appId}</span>
                   </p>
 
+                  {policy.persistenceWarning && (
+                    <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-3">
+                      <p className="text-xs text-amber-300 leading-relaxed">
+                        {policy.persistenceWarning}
+                      </p>
+                    </div>
+                  )}
+
+                  <a
+                    href={`https://testnet.explorer.perawallet.app/address/${algosdk.getApplicationAddress(policy.appId).toString()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-xs text-slate-600 hover:text-cyan-400 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span className="font-mono truncate">
+                      App escrow:{" "}
+                      {algosdk.getApplicationAddress(policy.appId).toString()}
+                    </span>
+                  </a>
+
                   {policy.delayMinutes !== undefined && (
                     <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-4">
                       <p className="text-sm text-slate-700">
@@ -1254,14 +1337,17 @@ export default function AppPage() {
                         className="text-2xl font-bold mb-2 text-emerald-400"
                         style={{ fontFamily: "Syne, sans-serif" }}
                       >
-                        Payout sent!
+                        {policy.payoutDemoMode
+                          ? "Demo payout sent!"
+                          : "Payout sent!"}
                       </h3>
                       <p className="text-slate-700 mb-1">
                         {policy.productLabel} · {policy.coverage} ALGO
                       </p>
                       <p className="text-slate-600 text-sm mb-2">
-                        {policy.delayMinutes} minute trigger confirmed · Paid
-                        automatically by smart contract
+                        {policy.payoutDemoMode
+                          ? `${policy.delayMinutes} minute trigger confirmed · Demo mode on testnet`
+                          : `${policy.delayMinutes} minute trigger confirmed · Paid automatically by smart contract`}
                       </p>
                     </div>
 
@@ -1284,7 +1370,9 @@ export default function AppPage() {
                             <div className="flex items-center gap-2 px-3 py-2 bg-emerald-400/5 border border-emerald-400/20 rounded-lg">
                               <TrendingUp className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                               <span className="text-sm text-emerald-300">
-                                Coverage received
+                                {policy.payoutDemoMode
+                                  ? "Demo payout"
+                                  : "Coverage received"}
                               </span>
                               <span className="ml-auto font-bold text-emerald-400">
                                 +{policy.coverage} ALGO

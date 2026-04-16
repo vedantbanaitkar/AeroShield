@@ -23,7 +23,7 @@ import { TransactionComposer, AppCallMethodCall, AppMethodCallTransactionArgumen
 import { SendParams, SendSingleTransactionResult, SendAtomicTransactionComposerResults } from '@algorandfoundation/algokit-utils/types/transaction'
 import { Address, encodeAddress, modelsv2, OnApplicationComplete, Transaction, TransactionSigner } from 'algosdk'
 
-export const APP_SPEC: Arc56Contract = {"name":"HelloWorld","structs":{},"methods":[{"name":"createApplication","args":[{"type":"address","name":"oracleAddr"}],"returns":{"type":"void"},"actions":{"create":["NoOp"],"call":[]},"readonly":false,"events":[],"recommendations":{}},{"name":"buyPolicy","args":[{"type":"pay","name":"paymentTxn"},{"type":"string","name":"flightNumber"},{"type":"uint64","name":"coverageAmount"},{"type":"uint64","name":"delayThreshold"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}},{"name":"triggerPayout","args":[{"type":"address","name":"beneficiary"},{"type":"uint64","name":"coverageAmount"},{"type":"string","name":"flightNumber"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":0,"bytes":1},"local":{"ints":0,"bytes":0}},"keys":{"global":{"oracle":{"keyType":"AVMString","valueType":"address","key":"b3JhY2xl"}},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{}}},"bareActions":{"create":[],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[19],"errorMessage":"OnCompletion must be NoOp"},{"pc":[177],"errorMessage":"check GlobalState exists"},{"pc":[89,164],"errorMessage":"invalid array length header"},{"pc":[96,171],"errorMessage":"invalid number of bytes for arc4.dynamic_array<arc4.uint8>"},{"pc":[68,149],"errorMessage":"invalid number of bytes for arc4.static_array<arc4.uint8, 32>"},{"pc":[104,113,157],"errorMessage":"invalid number of bytes for arc4.uint64"},{"pc":[83],"errorMessage":"transaction type is pay"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYXJjNC9pbmRleC5kLnRzOjpDb250cmFjdC5hcHByb3ZhbFByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBpbnRjYmxvY2sgMSAwIDggMzIKICAgIGJ5dGVjYmxvY2sgIm9yYWNsZSIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjQKICAgIC8vIGV4cG9ydCBjbGFzcyBIZWxsb1dvcmxkIGV4dGVuZHMgQ29udHJhY3QgewogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBtdXN0IGJlIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBieiBtYWluX2NyZWF0ZV9Ob09wQDYKICAgIHB1c2hieXRlc3MgMHg0NzNmNDc0MCAweDk2MmEwMDNhIC8vIG1ldGhvZCAiYnV5UG9saWN5KHBheSxzdHJpbmcsdWludDY0LHVpbnQ2NCl2b2lkIiwgbWV0aG9kICJ0cmlnZ2VyUGF5b3V0KGFkZHJlc3MsdWludDY0LHN0cmluZyl2b2lkIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggYnV5UG9saWN5IHRyaWdnZXJQYXlvdXQKICAgIGVycgoKbWFpbl9jcmVhdGVfTm9PcEA2OgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NAogICAgLy8gZXhwb3J0IGNsYXNzIEhlbGxvV29ybGQgZXh0ZW5kcyBDb250cmFjdCB7CiAgICBwdXNoYnl0ZXMgMHhkMzI0YmVhNCAvLyBtZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKGFkZHJlc3Mpdm9pZCIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIGNyZWF0ZUFwcGxpY2F0aW9uCiAgICBlcnIKCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5jcmVhdGVBcHBsaWNhdGlvbltyb3V0aW5nXSgpIC0+IHZvaWQ6CmNyZWF0ZUFwcGxpY2F0aW9uOgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NwogICAgLy8gQGFiaW1ldGhvZCh7IG9uQ3JlYXRlOiAncmVxdWlyZScgfSkKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGR1cAogICAgbGVuCiAgICBpbnRjXzMgLy8gMzIKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQuc3RhdGljX2FycmF5PGFyYzQudWludDgsIDMyPgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NQogICAgLy8gb3JhY2xlID0gR2xvYmFsU3RhdGU8QWNjb3VudD4oKQogICAgYnl0ZWNfMCAvLyAib3JhY2xlIgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6OQogICAgLy8gdGhpcy5vcmFjbGUudmFsdWUgPSBvcmFjbGVBZGRyCiAgICBzd2FwCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NwogICAgLy8gQGFiaW1ldGhvZCh7IG9uQ3JlYXRlOiAncmVxdWlyZScgfSkKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5idXlQb2xpY3lbcm91dGluZ10oKSAtPiB2b2lkOgpidXlQb2xpY3k6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoxMwogICAgLy8gQGFiaW1ldGhvZCh7IGFsbG93QWN0aW9uczogWydOb09wJ10gfSkKICAgIHR4biBHcm91cEluZGV4CiAgICBpbnRjXzAgLy8gMQogICAgLQogICAgZHVwCiAgICBndHhucyBUeXBlRW51bQogICAgaW50Y18wIC8vIHBheQogICAgPT0KICAgIGFzc2VydCAvLyB0cmFuc2FjdGlvbiB0eXBlIGlzIHBheQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBpbnRjXzEgLy8gMAogICAgZXh0cmFjdF91aW50MTYgLy8gb24gZXJyb3I6IGludmFsaWQgYXJyYXkgbGVuZ3RoIGhlYWRlcgogICAgcHVzaGludCAyIC8vIDIKICAgICsKICAgIHN3YXAKICAgIGxlbgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5keW5hbWljX2FycmF5PGFyYzQudWludDg+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoyMAogICAgLy8gYXNzZXJ0KHBheW1lbnRUeG4uc2VuZGVyID09PSBUeG4uc2VuZGVyKQogICAgZGlnIDIKICAgIGd0eG5zIFNlbmRlcgogICAgdHhuIFNlbmRlcgogICAgPT0KICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MjEKICAgIC8vIGFzc2VydChwYXltZW50VHhuLnJlY2VpdmVyID09PSBHbG9iYWwuY3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcykKICAgIGRpZyAyCiAgICBndHhucyBSZWNlaXZlcgogICAgZ2xvYmFsIEN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MKICAgID09CiAgICBhc3NlcnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjIyCiAgICAvLyBhc3NlcnQocGF5bWVudFR4bi5hbW91bnQgPiAwKQogICAgdW5jb3ZlciAyCiAgICBndHhucyBBbW91bnQKICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MjMKICAgIC8vIGFzc2VydChjb3ZlcmFnZUFtb3VudCA+IDApCiAgICBzd2FwCiAgICBhc3NlcnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI0CiAgICAvLyBhc3NlcnQoZGVsYXlUaHJlc2hvbGQgPj0gNjApCiAgICBwdXNoaW50IDYwIC8vIDYwCiAgICA+PQogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MTMKICAgIC8vIEBhYmltZXRob2QoeyBhbGxvd0FjdGlvbnM6IFsnTm9PcCddIH0pCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC50cmlnZ2VyUGF5b3V0W3JvdXRpbmddKCkgLT4gdm9pZDoKdHJpZ2dlclBheW91dDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI4CiAgICAvLyBAYWJpbWV0aG9kKHsgYWxsb3dBY3Rpb25zOiBbJ05vT3AnXSB9KQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBsZW4KICAgIGludGNfMyAvLyAzMgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5zdGF0aWNfYXJyYXk8YXJjNC51aW50OCwgMzI+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBkdXAKICAgIGludGNfMSAvLyAwCiAgICBleHRyYWN0X3VpbnQxNiAvLyBvbiBlcnJvcjogaW52YWxpZCBhcnJheSBsZW5ndGggaGVhZGVyCiAgICBwdXNoaW50IDIgLy8gMgogICAgKwogICAgc3dhcAogICAgbGVuCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LmR5bmFtaWNfYXJyYXk8YXJjNC51aW50OD4KICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjM0CiAgICAvLyBhc3NlcnQoVHhuLnNlbmRlciA9PT0gdGhpcy5vcmFjbGUudmFsdWUpCiAgICB0eG4gU2VuZGVyCiAgICBpbnRjXzEgLy8gMAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NQogICAgLy8gb3JhY2xlID0gR2xvYmFsU3RhdGU8QWNjb3VudD4oKQogICAgYnl0ZWNfMCAvLyAib3JhY2xlIgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MzQKICAgIC8vIGFzc2VydChUeG4uc2VuZGVyID09PSB0aGlzLm9yYWNsZS52YWx1ZSkKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgR2xvYmFsU3RhdGUgZXhpc3RzCiAgICA9PQogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNQogICAgLy8gYXNzZXJ0KGNvdmVyYWdlQW1vdW50ID4gMCkKICAgIGR1cAogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNy00MQogICAgLy8gaXR4bi5wYXltZW50KHsKICAgIC8vICAgcmVjZWl2ZXI6IGJlbmVmaWNpYXJ5LAogICAgLy8gICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICBmZWU6IDAsCiAgICAvLyB9KS5zdWJtaXQoKQogICAgaXR4bl9iZWdpbgogICAgaXR4bl9maWVsZCBBbW91bnQKICAgIGl0eG5fZmllbGQgUmVjZWl2ZXIKICAgIGludGNfMCAvLyAxCiAgICBpdHhuX2ZpZWxkIFR5cGVFbnVtCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo0MAogICAgLy8gZmVlOiAwLAogICAgaW50Y18xIC8vIDAKICAgIGl0eG5fZmllbGQgRmVlCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNy00MQogICAgLy8gaXR4bi5wYXltZW50KHsKICAgIC8vICAgcmVjZWl2ZXI6IGJlbmVmaWNpYXJ5LAogICAgLy8gICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICBmZWU6IDAsCiAgICAvLyB9KS5zdWJtaXQoKQogICAgaXR4bl9zdWJtaXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjI4CiAgICAvLyBAYWJpbWV0aG9kKHsgYWxsb3dBY3Rpb25zOiBbJ05vT3AnXSB9KQogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYmFzZS1jb250cmFjdC5kLnRzOjpCYXNlQ29udHJhY3QuY2xlYXJTdGF0ZVByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBwdXNoaW50IDEgLy8gMQogICAgcmV0dXJuCg=="},"byteCode":{"approval":"CyAEAQAIICYBBm9yYWNsZTEZFEQxGEEAFoICBEc/R0AElioAOjYaAI4CABwAYACABNMkvqQ2GgCOAQABADYaAUkVJRJEKExnIkMxFiIJSTgQIhJENhoBSSNZgQIITBUSRDYaAkkVJBJEFzYaA0kVJBJEF0sCOAAxABJESwI4BzIKEkRPAjgIRExEgTwPQzYaAUkVJRJENhoCSRUkEkQXNhoDSSNZgQIITBUSRDEAIyhlRBJESUSxsgiyByKyECOyAbMiQw==","clear":"C4EBQw=="},"events":[],"templateVariables":{}} as unknown as Arc56Contract
+export const APP_SPEC: Arc56Contract = {"name":"HelloWorld","structs":{},"methods":[{"name":"createApplication","args":[{"type":"address","name":"oracleAddr"}],"returns":{"type":"void"},"actions":{"create":["NoOp"],"call":[]},"readonly":false,"events":[],"recommendations":{}},{"name":"buyPolicy","args":[{"type":"pay","name":"paymentTxn"},{"type":"string","name":"flightNumber"},{"type":"uint64","name":"coverageAmount"},{"type":"uint64","name":"delayThreshold"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}},{"name":"triggerPayout","args":[{"type":"byte[32]","name":"beneficiary"},{"type":"uint64","name":"coverageAmount"},{"type":"string","name":"flightNumber"}],"returns":{"type":"void"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":0,"bytes":1},"local":{"ints":0,"bytes":0}},"keys":{"global":{"oracle":{"keyType":"AVMString","valueType":"address","key":"b3JhY2xl"}},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{}}},"bareActions":{"create":[],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[19],"errorMessage":"OnCompletion must be NoOp"},{"pc":[177],"errorMessage":"check GlobalState exists"},{"pc":[89,164],"errorMessage":"invalid array length header"},{"pc":[96,171],"errorMessage":"invalid number of bytes for arc4.dynamic_array<arc4.uint8>"},{"pc":[68,149],"errorMessage":"invalid number of bytes for arc4.static_array<arc4.uint8, 32>"},{"pc":[104,113,157],"errorMessage":"invalid number of bytes for arc4.uint64"},{"pc":[83],"errorMessage":"transaction type is pay"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYXJjNC9pbmRleC5kLnRzOjpDb250cmFjdC5hcHByb3ZhbFByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBpbnRjYmxvY2sgMSAwIDggMzIKICAgIGJ5dGVjYmxvY2sgIm9yYWNsZSIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjE2CiAgICAvLyBleHBvcnQgY2xhc3MgSGVsbG9Xb3JsZCBleHRlbmRzIENvbnRyYWN0IHsKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gbXVzdCBiZSBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYnogbWFpbl9jcmVhdGVfTm9PcEA2CiAgICBwdXNoYnl0ZXNzIDB4NDczZjQ3NDAgMHg0NDcwODIyNyAvLyBtZXRob2QgImJ1eVBvbGljeShwYXksc3RyaW5nLHVpbnQ2NCx1aW50NjQpdm9pZCIsIG1ldGhvZCAidHJpZ2dlclBheW91dChieXRlWzMyXSx1aW50NjQsc3RyaW5nKXZvaWQiCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBidXlQb2xpY3kgdHJpZ2dlclBheW91dAogICAgZXJyCgptYWluX2NyZWF0ZV9Ob09wQDY6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoxNgogICAgLy8gZXhwb3J0IGNsYXNzIEhlbGxvV29ybGQgZXh0ZW5kcyBDb250cmFjdCB7CiAgICBwdXNoYnl0ZXMgMHhkMzI0YmVhNCAvLyBtZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKGFkZHJlc3Mpdm9pZCIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIGNyZWF0ZUFwcGxpY2F0aW9uCiAgICBlcnIKCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5jcmVhdGVBcHBsaWNhdGlvbltyb3V0aW5nXSgpIC0+IHZvaWQ6CmNyZWF0ZUFwcGxpY2F0aW9uOgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MTkKICAgIC8vIEBhYmltZXRob2QoeyBvbkNyZWF0ZTogInJlcXVpcmUiIH0pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18zIC8vIDMyCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnN0YXRpY19hcnJheTxhcmM0LnVpbnQ4LCAzMj4KICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjE3CiAgICAvLyBvcmFjbGUgPSBHbG9iYWxTdGF0ZTxBY2NvdW50PigpOwogICAgYnl0ZWNfMCAvLyAib3JhY2xlIgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MjEKICAgIC8vIHRoaXMub3JhY2xlLnZhbHVlID0gb3JhY2xlQWRkcjsKICAgIHN3YXAKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoxOQogICAgLy8gQGFiaW1ldGhvZCh7IG9uQ3JlYXRlOiAicmVxdWlyZSIgfSkKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo6SGVsbG9Xb3JsZC5idXlQb2xpY3lbcm91dGluZ10oKSAtPiB2b2lkOgpidXlQb2xpY3k6CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoyNQogICAgLy8gQGFiaW1ldGhvZCh7IGFsbG93QWN0aW9uczogWyJOb09wIl0gfSkKICAgIHR4biBHcm91cEluZGV4CiAgICBpbnRjXzAgLy8gMQogICAgLQogICAgZHVwCiAgICBndHhucyBUeXBlRW51bQogICAgaW50Y18wIC8vIHBheQogICAgPT0KICAgIGFzc2VydCAvLyB0cmFuc2FjdGlvbiB0eXBlIGlzIHBheQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBpbnRjXzEgLy8gMAogICAgZXh0cmFjdF91aW50MTYgLy8gb24gZXJyb3I6IGludmFsaWQgYXJyYXkgbGVuZ3RoIGhlYWRlcgogICAgcHVzaGludCAyIC8vIDIKICAgICsKICAgIHN3YXAKICAgIGxlbgogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC5keW5hbWljX2FycmF5PGFyYzQudWludDg+CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18yIC8vIDgKICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQudWludDY0CiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozMgogICAgLy8gYXNzZXJ0KHBheW1lbnRUeG4uc2VuZGVyID09PSBUeG4uc2VuZGVyKTsKICAgIGRpZyAyCiAgICBndHhucyBTZW5kZXIKICAgIHR4biBTZW5kZXIKICAgID09CiAgICBhc3NlcnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjMzCiAgICAvLyBhc3NlcnQocGF5bWVudFR4bi5yZWNlaXZlciA9PT0gR2xvYmFsLmN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MpOwogICAgZGlnIDIKICAgIGd0eG5zIFJlY2VpdmVyCiAgICBnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwogICAgPT0KICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MzQKICAgIC8vIGFzc2VydChwYXltZW50VHhuLmFtb3VudCA+IDApOwogICAgdW5jb3ZlciAyCiAgICBndHhucyBBbW91bnQKICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MzUKICAgIC8vIGFzc2VydChjb3ZlcmFnZUFtb3VudCA+IDApOwogICAgc3dhcAogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czozNgogICAgLy8gYXNzZXJ0KGRlbGF5VGhyZXNob2xkID49IDYwKTsKICAgIHB1c2hpbnQgNjAgLy8gNjAKICAgID49CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czoyNQogICAgLy8gQGFiaW1ldGhvZCh7IGFsbG93QWN0aW9uczogWyJOb09wIl0gfSkKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjpIZWxsb1dvcmxkLnRyaWdnZXJQYXlvdXRbcm91dGluZ10oKSAtPiB2b2lkOgp0cmlnZ2VyUGF5b3V0OgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NDAKICAgIC8vIEBhYmltZXRob2QoeyBhbGxvd0FjdGlvbnM6IFsiTm9PcCJdIH0pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBkdXAKICAgIGxlbgogICAgaW50Y18zIC8vIDMyCiAgICA9PQogICAgYXNzZXJ0IC8vIGludmFsaWQgbnVtYmVyIG9mIGJ5dGVzIGZvciBhcmM0LnN0YXRpY19hcnJheTxhcmM0LnVpbnQ4LCAzMj4KICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDIKICAgIGR1cAogICAgbGVuCiAgICBpbnRjXzIgLy8gOAogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgYXJjNC51aW50NjQKICAgIGJ0b2kKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDMKICAgIGR1cAogICAgaW50Y18xIC8vIDAKICAgIGV4dHJhY3RfdWludDE2IC8vIG9uIGVycm9yOiBpbnZhbGlkIGFycmF5IGxlbmd0aCBoZWFkZXIKICAgIHB1c2hpbnQgMiAvLyAyCiAgICArCiAgICBzd2FwCiAgICBsZW4KICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIGFyYzQuZHluYW1pY19hcnJheTxhcmM0LnVpbnQ4PgogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NDYKICAgIC8vIGFzc2VydChUeG4uc2VuZGVyID09PSB0aGlzLm9yYWNsZS52YWx1ZSk7CiAgICB0eG4gU2VuZGVyCiAgICBpbnRjXzEgLy8gMAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6MTcKICAgIC8vIG9yYWNsZSA9IEdsb2JhbFN0YXRlPEFjY291bnQ+KCk7CiAgICBieXRlY18wIC8vICJvcmFjbGUiCiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo0NgogICAgLy8gYXNzZXJ0KFR4bi5zZW5kZXIgPT09IHRoaXMub3JhY2xlLnZhbHVlKTsKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgR2xvYmFsU3RhdGUgZXhpc3RzCiAgICA9PQogICAgYXNzZXJ0CiAgICAvLyBzbWFydF9jb250cmFjdHMvaGVsbG9fd29ybGQvY29udHJhY3QuYWxnby50czo0NwogICAgLy8gYXNzZXJ0KGNvdmVyYWdlQW1vdW50ID4gMCk7CiAgICBkdXAKICAgIGFzc2VydAogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NDktNTUKICAgIC8vIGl0eG4KICAgIC8vICAgLnBheW1lbnQoewogICAgLy8gICAgIHJlY2VpdmVyOiBiZW5lZmljaWFyeSwKICAgIC8vICAgICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICAgIGZlZTogMCwKICAgIC8vICAgfSkKICAgIC8vICAgLnN1Ym1pdCgpOwogICAgaXR4bl9iZWdpbgogICAgaXR4bl9maWVsZCBBbW91bnQKICAgIGl0eG5fZmllbGQgUmVjZWl2ZXIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjQ5LTU0CiAgICAvLyBpdHhuCiAgICAvLyAgIC5wYXltZW50KHsKICAgIC8vICAgICByZWNlaXZlcjogYmVuZWZpY2lhcnksCiAgICAvLyAgICAgYW1vdW50OiBjb3ZlcmFnZUFtb3VudCwKICAgIC8vICAgICBmZWU6IDAsCiAgICAvLyAgIH0pCiAgICBpbnRjXzAgLy8gMQogICAgaXR4bl9maWVsZCBUeXBlRW51bQogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NTMKICAgIC8vIGZlZTogMCwKICAgIGludGNfMSAvLyAwCiAgICBpdHhuX2ZpZWxkIEZlZQogICAgLy8gc21hcnRfY29udHJhY3RzL2hlbGxvX3dvcmxkL2NvbnRyYWN0LmFsZ28udHM6NDktNTUKICAgIC8vIGl0eG4KICAgIC8vICAgLnBheW1lbnQoewogICAgLy8gICAgIHJlY2VpdmVyOiBiZW5lZmljaWFyeSwKICAgIC8vICAgICBhbW91bnQ6IGNvdmVyYWdlQW1vdW50LAogICAgLy8gICAgIGZlZTogMCwKICAgIC8vICAgfSkKICAgIC8vICAgLnN1Ym1pdCgpOwogICAgaXR4bl9zdWJtaXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9oZWxsb193b3JsZC9jb250cmFjdC5hbGdvLnRzOjQwCiAgICAvLyBAYWJpbWV0aG9kKHsgYWxsb3dBY3Rpb25zOiBbIk5vT3AiXSB9KQogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBAYWxnb3JhbmRmb3VuZGF0aW9uL2FsZ29yYW5kLXR5cGVzY3JpcHQvYmFzZS1jb250cmFjdC5kLnRzOjpCYXNlQ29udHJhY3QuY2xlYXJTdGF0ZVByb2dyYW0oKSAtPiB1aW50NjQ6Cm1haW46CiAgICBwdXNoaW50IDEgLy8gMQogICAgcmV0dXJuCg=="},"byteCode":{"approval":"CyAEAQAIICYBBm9yYWNsZTEZFEQxGEEAFoICBEc/R0AERHCCJzYaAI4CABwAYACABNMkvqQ2GgCOAQABADYaAUkVJRJEKExnIkMxFiIJSTgQIhJENhoBSSNZgQIITBUSRDYaAkkVJBJEFzYaA0kVJBJEF0sCOAAxABJESwI4BzIKEkRPAjgIRExEgTwPQzYaAUkVJRJENhoCSRUkEkQXNhoDSSNZgQIITBUSRDEAIyhlRBJESUSxsgiyByKyECOyAbMiQw==","clear":"C4EBQw=="},"events":[],"templateVariables":{}} as unknown as Arc56Contract
 
 /**
  * A state record containing binary data
@@ -79,8 +79,8 @@ export type HelloWorldArgs = {
       coverageAmount: bigint | number
       delayThreshold: bigint | number
     }
-    'triggerPayout(address,uint64,string)void': {
-      beneficiary: string
+    'triggerPayout(byte[32],uint64,string)void': {
+      beneficiary: Uint8Array
       coverageAmount: bigint | number
       flightNumber: string
     }
@@ -91,7 +91,7 @@ export type HelloWorldArgs = {
   tuple: {
     'createApplication(address)void': [oracleAddr: string]
     'buyPolicy(pay,string,uint64,uint64)void': [paymentTxn: AppMethodCallTransactionArgument, flightNumber: string, coverageAmount: bigint | number, delayThreshold: bigint | number]
-    'triggerPayout(address,uint64,string)void': [beneficiary: string, coverageAmount: bigint | number, flightNumber: string]
+    'triggerPayout(byte[32],uint64,string)void': [beneficiary: Uint8Array, coverageAmount: bigint | number, flightNumber: string]
   }
 }
 
@@ -101,7 +101,7 @@ export type HelloWorldArgs = {
 export type HelloWorldReturns = {
   'createApplication(address)void': void
   'buyPolicy(pay,string,uint64,uint64)void': void
-  'triggerPayout(address,uint64,string)void': void
+  'triggerPayout(byte[32],uint64,string)void': void
 }
 
 /**
@@ -122,10 +122,10 @@ export type HelloWorldTypes = {
       argsTuple: HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']
       returns: HelloWorldReturns['buyPolicy(pay,string,uint64,uint64)void']
     }>
-    & Record<'triggerPayout(address,uint64,string)void' | 'triggerPayout', {
-      argsObj: HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void']
-      argsTuple: HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']
-      returns: HelloWorldReturns['triggerPayout(address,uint64,string)void']
+    & Record<'triggerPayout(byte[32],uint64,string)void' | 'triggerPayout', {
+      argsObj: HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void']
+      argsTuple: HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']
+      returns: HelloWorldReturns['triggerPayout(byte[32],uint64,string)void']
     }>
   /**
    * Defines the shape of the state of the application.
@@ -234,15 +234,15 @@ export abstract class HelloWorldParamsFactory {
     }
   }
   /**
-   * Constructs a no op call for the triggerPayout(address,uint64,string)void ABI method
+   * Constructs a no op call for the triggerPayout(byte[32],uint64,string)void ABI method
    *
    * @param params Parameters for the call
    * @returns An `AppClientMethodCallParams` object for the call
    */
-  static triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
+  static triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
     return {
       ...params,
-      method: 'triggerPayout(address,uint64,string)void' as const,
+      method: 'triggerPayout(byte[32],uint64,string)void' as const,
       args: Array.isArray(params.args) ? params.args : [params.args.beneficiary, params.args.coverageAmount, params.args.flightNumber],
     }
   }
@@ -490,12 +490,12 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(byte[32],uint64,string)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call params
      */
-    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       return this.appClient.params.call(HelloWorldParamsFactory.triggerPayout(params))
     },
 
@@ -526,12 +526,12 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(byte[32],uint64,string)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call transaction
      */
-    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    triggerPayout: (params: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       return this.appClient.createTransaction.call(HelloWorldParamsFactory.triggerPayout(params))
     },
 
@@ -563,14 +563,14 @@ export class HelloWorldClient {
     },
 
     /**
-     * Makes a call to the HelloWorld smart contract using the `triggerPayout(address,uint64,string)void` ABI method.
+     * Makes a call to the HelloWorld smart contract using the `triggerPayout(byte[32],uint64,string)void` ABI method.
      *
      * @param params The params for the smart contract call
      * @returns The call result
      */
-    triggerPayout: async (params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    triggerPayout: async (params: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       const result = await this.appClient.send.call(HelloWorldParamsFactory.triggerPayout(params))
-      return {...result, return: result.return as unknown as (undefined | HelloWorldReturns['triggerPayout(address,uint64,string)void'])}
+      return {...result, return: result.return as unknown as (undefined | HelloWorldReturns['triggerPayout(byte[32],uint64,string)void'])}
     },
 
   }
@@ -624,9 +624,9 @@ export class HelloWorldClient {
         return this
       },
       /**
-       * Add a triggerPayout(address,uint64,string)void method call against the HelloWorld contract
+       * Add a triggerPayout(byte[32],uint64,string)void method call against the HelloWorld contract
        */
-      triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
+      triggerPayout(params: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
         promiseChain = promiseChain.then(async () => composer.addAppCallMethodCall(await client.params.triggerPayout(params)))
         resultMappers.push(undefined)
         return this
@@ -676,13 +676,13 @@ export type HelloWorldComposer<TReturns extends [...any[]] = []> = {
   buyPolicy(params?: CallParams<HelloWorldArgs['obj']['buyPolicy(pay,string,uint64,uint64)void'] | HelloWorldArgs['tuple']['buyPolicy(pay,string,uint64,uint64)void']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['buyPolicy(pay,string,uint64,uint64)void'] | undefined]>
 
   /**
-   * Calls the triggerPayout(address,uint64,string)void ABI method.
+   * Calls the triggerPayout(byte[32],uint64,string)void ABI method.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
    */
-  triggerPayout(params?: CallParams<HelloWorldArgs['obj']['triggerPayout(address,uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(address,uint64,string)void']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['triggerPayout(address,uint64,string)void'] | undefined]>
+  triggerPayout(params?: CallParams<HelloWorldArgs['obj']['triggerPayout(byte[32],uint64,string)void'] | HelloWorldArgs['tuple']['triggerPayout(byte[32],uint64,string)void']>): HelloWorldComposer<[...TReturns, HelloWorldReturns['triggerPayout(byte[32],uint64,string)void'] | undefined]>
 
   /**
    * Makes a clear_state call to an existing instance of the HelloWorld smart contract.
